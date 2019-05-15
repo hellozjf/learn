@@ -5,6 +5,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>corejava11</module>
+        <module>springboot2</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -12,8 +13,8 @@
         <version>2.1.4.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.hellozjf</groupId>
-    <artifactId>learn</artifactId>
+    <groupId>com.hellozjf.learn</groupId>
+    <artifactId>pom</artifactId>
     <version>1.0.0</version>
     <name>learn</name>
     <description>learn</description>
