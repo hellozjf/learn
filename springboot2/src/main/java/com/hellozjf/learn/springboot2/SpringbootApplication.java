@@ -3,11 +3,13 @@ package com.hellozjf.learn.springboot2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 /**
  * @author hellozjf
  */
 @SpringBootApplication
+@EnableJpaAuditing
 @Slf4j
 public class SpringbootApplication {
 
