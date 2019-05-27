@@ -8,7 +8,6 @@ import com.hellozjf.learn.company.zrar.csmonitor_data_generator.util.SleepUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.data.cassandra.repository.CassandraRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +28,7 @@ public class CsadRunnable implements Runnable {
     private ServicelogRepository servicelogRepository;
     private CustomserviceRepository customserviceRepository;
     private CacsiresultRepository cacsiresultRepository;
+    private MessageinfoRepository messageinfoRepository;
     private CustomConfig customConfig;
     private Random random;
 
@@ -84,19 +84,27 @@ public class CsadRunnable implements Runnable {
                             customserviceRepository.save(customservice);
                             // 每1-10秒插入一条人工坐席消息
                             while (startTime < totalTime) {
-                                Messagetemp messagetemp = new Messagetemp();
-                                Messagetemp.Key messagetempKey = new Messagetemp.Key();
-                                messagetempKey.setUid(UUID.randomUUID().toString());
-                                messagetempKey.setTime(System.currentTimeMillis());
-                                messagetempKey.setMessageId(UUID.randomUUID().toString());
-                                messagetemp.setKey(messagetempKey);
-                                messagetemp.setChannelId("WEB");
-                                messagetemp.setContent(RandomStringUtils.randomAlphanumeric(10, 51));
-                                messagetemp.setGroupid(groupId);
-                                messagetemp.setMsgtype(getMsgType());
-                                messagetemp.setSessionId(sessionId);
-                                log.debug("{} messagetemp: {}", csadid, messagetemp);
-                                messagetempRepository.save(messagetemp);
+                                Messageinfo messageinfo = new Messageinfo();
+                                Messageinfo.Key messageinfoKey = new Messageinfo.Key();
+                                messageinfoKey.setSpecifyPk(UUID.randomUUID().toString());
+                                messageinfoKey.setTimeSave(System.currentTimeMillis());
+                                messageinfoKey.setMessageId(UUID.randomUUID().toString());
+                                messageinfo.setKey(messageinfoKey);
+                                messageinfo.setChannelFrom("WEB");
+                                messageinfo.setChannelTo("WEB");
+                                messageinfo.setContent(RandomStringUtils.randomAlphanumeric(10, 51));
+                                messageinfo.setFromuser("SYSTEM");
+                                messageinfo.setMsgtype(getMsgType());
+                                messageinfo.setNumSend(0);
+                                messageinfo.setSessionId(sessionId);
+                                messageinfo.setState(1);
+                                messageinfo.setStype(0);
+                                messageinfo.setTimeReceipt(null);
+                                messageinfo.setTimeSend(System.currentTimeMillis());
+                                messageinfo.setTouser(clientId);
+                                messageinfo.setType(1);
+                                log.debug("{} messagetemp: {}", csadid, messageinfo);
+                                messageinfoRepository.save(messageinfo);
                                 randTime = random.nextInt(10) + 1;
                                 SleepUtils.sleep(TimeUnit.SECONDS, randTime);
                                 startTime += randTime;

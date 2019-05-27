@@ -39,6 +39,9 @@ public class Main implements CommandLineRunner {
     private CacsiresultRepository cacsiresultRepository;
 
     @Autowired
+    private MessageinfoRepository messageinfoRepository;
+
+    @Autowired
     private CustomConfig customConfig;
 
     @Autowired
@@ -66,6 +69,7 @@ public class Main implements CommandLineRunner {
                     servicelogRepository,
                     customserviceRepository,
                     cacsiresultRepository,
+                    messageinfoRepository,
                     customConfig,
                     random));
         }

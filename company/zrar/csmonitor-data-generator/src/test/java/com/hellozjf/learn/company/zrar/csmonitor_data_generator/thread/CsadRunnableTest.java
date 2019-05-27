@@ -41,6 +41,9 @@ public class CsadRunnableTest {
     private CacsiresultRepository cacsiresultRepository;
 
     @Autowired
+    private MessageinfoRepository messageinfoRepository;
+
+    @Autowired
     private CustomConfig customConfig;
 
     @Autowired
@@ -57,6 +60,7 @@ public class CsadRunnableTest {
                 servicelogRepository,
                 customserviceRepository,
                 cacsiresultRepository,
+                messageinfoRepository,
                 customConfig,
                 random);
         executorService.execute(runnable);
