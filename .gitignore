@@ -30,3 +30,5 @@ HELP.md
 /.mvn/
 /mvnw.cmd
 /mvnw
+/company/zrar/csmonitor-data-generator/logs/
+/logs/

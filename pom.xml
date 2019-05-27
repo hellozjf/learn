@@ -6,6 +6,7 @@
     <modules>
         <module>corejava11</module>
         <module>springboot2</module>
+        <module>company</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
