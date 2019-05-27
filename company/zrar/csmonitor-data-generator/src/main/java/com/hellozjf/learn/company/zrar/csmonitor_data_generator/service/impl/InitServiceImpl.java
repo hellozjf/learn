@@ -3,10 +3,7 @@ package com.hellozjf.learn.company.zrar.csmonitor_data_generator.service.impl;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.constant.CsadStateEnum;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.domain.Csadstate;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.dto.GroupUnitDTO;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.CsadstateRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.CustomserviceRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.MessagetempRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.ServicelogRepository;
+import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.*;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.service.GroupService;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.service.InitService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +32,9 @@ public class InitServiceImpl implements InitService {
     private CustomserviceRepository customserviceRepository;
 
     @Autowired
+    private CacsiresultRepository cacsiresultRepository;
+
+    @Autowired
     private GroupService groupService;
 
     @Autowired
@@ -46,6 +46,7 @@ public class InitServiceImpl implements InitService {
         initMessagetemp();
         initServicelog();
         initCustomservice();
+        initCacsiresult();
     }
 
     @Override
@@ -85,5 +86,10 @@ public class InitServiceImpl implements InitService {
     @Override
     public void initCustomservice() {
         customserviceRepository.deleteAll();
+    }
+
+    @Override
+    public void initCacsiresult() {
+        cacsiresultRepository.deleteAll();
     }
 }

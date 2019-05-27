@@ -2,18 +2,13 @@ package com.hellozjf.learn.company.zrar.csmonitor_data_generator.thread;
 
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.config.CustomConfig;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.constant.CsadStateEnum;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.domain.Csadstate;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.domain.Customservice;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.domain.Messagetemp;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.domain.Servicelog;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.CsadstateRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.CustomserviceRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.MessagetempRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.ServicelogRepository;
+import com.hellozjf.learn.company.zrar.csmonitor_data_generator.domain.*;
+import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.*;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.util.SleepUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.data.cassandra.repository.CassandraRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +28,7 @@ public class CsadRunnable implements Runnable {
     private MessagetempRepository messagetempRepository;
     private ServicelogRepository servicelogRepository;
     private CustomserviceRepository customserviceRepository;
+    private CacsiresultRepository cacsiresultRepository;
     private CustomConfig customConfig;
     private Random random;
 
@@ -123,6 +119,18 @@ public class CsadRunnable implements Runnable {
                             servicelog.setServiceId(String.valueOf(System.currentTimeMillis()));
                             log.debug("{} servicelog: {}", csadid, servicelog);
                             servicelogRepository.save(servicelog);
+
+                            if (willAnswerSurvey()) {
+                                // 如果会答复满意率调查表，则插入满意率调查结果
+                                Cacsiresult cacsiresult = new Cacsiresult();
+                                Cacsiresult.Key cacsiresultKey = new Cacsiresult.Key();
+                                cacsiresultKey.setClientid(clientId);
+                                cacsiresultKey.setSavetime(System.currentTimeMillis());
+                                cacsiresult.setKey(cacsiresultKey);
+                                cacsiresult.setCacsi(getSurveyResult());
+                                cacsiresult.setSessionid(sessionId);
+                                cacsiresultRepository.save(cacsiresult);
+                            }
                         }
                         localDateTime = LocalDateTime.now();
                         hour = localDateTime.getHour();
@@ -172,6 +180,32 @@ public class CsadRunnable implements Runnable {
         } else {
             // 1/10概率是视频消息
             return 3;
+        }
+    }
+
+    private boolean willAnswerSurvey() {
+        int rand = random.nextInt(4);
+        if (rand < 3) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private String getSurveyResult() {
+        int rand = random.nextInt(10);
+        if (rand < 1) {
+            // 10%的用户非常满意
+            return "1";
+        } else if (rand < 3) {
+            // 20%的用户满意
+            return "2";
+        } else if (rand < 9) {
+            // 60%的用户一般
+            return "3";
+        } else {
+            // 10%的用户不满意
+            return "4";
         }
     }
 }

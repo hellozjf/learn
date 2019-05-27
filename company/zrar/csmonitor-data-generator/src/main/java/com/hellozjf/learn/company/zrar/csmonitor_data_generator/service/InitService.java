@@ -9,4 +9,5 @@ public interface InitService {
     void initMessagetemp();
     void initServicelog();
     void initCustomservice();
+    void initCacsiresult();
 }

@@ -2,10 +2,7 @@ package com.hellozjf.learn.company.zrar.csmonitor_data_generator.thread;
 
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.config.CustomConfig;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.domain.Csadstate;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.CsadstateRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.CustomserviceRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.MessagetempRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.ServicelogRepository;
+import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.*;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.util.SleepUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -41,6 +38,9 @@ public class CsadRunnableTest {
     private CustomserviceRepository customserviceRepository;
 
     @Autowired
+    private CacsiresultRepository cacsiresultRepository;
+
+    @Autowired
     private CustomConfig customConfig;
 
     @Autowired
@@ -56,6 +56,7 @@ public class CsadRunnableTest {
                 messagetempRepository,
                 servicelogRepository,
                 customserviceRepository,
+                cacsiresultRepository,
                 customConfig,
                 random);
         executorService.execute(runnable);

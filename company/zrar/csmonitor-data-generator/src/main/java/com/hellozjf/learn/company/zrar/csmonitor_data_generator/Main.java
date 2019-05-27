@@ -2,10 +2,7 @@ package com.hellozjf.learn.company.zrar.csmonitor_data_generator;
 
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.config.CustomConfig;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.domain.Csadstate;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.CsadstateRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.CustomserviceRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.MessagetempRepository;
-import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.ServicelogRepository;
+import com.hellozjf.learn.company.zrar.csmonitor_data_generator.repository.*;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.service.InitService;
 import com.hellozjf.learn.company.zrar.csmonitor_data_generator.thread.CsadRunnable;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +36,9 @@ public class Main implements CommandLineRunner {
     private CustomserviceRepository customserviceRepository;
 
     @Autowired
+    private CacsiresultRepository cacsiresultRepository;
+
+    @Autowired
     private CustomConfig customConfig;
 
     @Autowired
@@ -56,6 +56,8 @@ public class Main implements CommandLineRunner {
             initService.initAll();
             csadstateList = csadstateRepository.findAll();
         }
+        // 启动的时候，要将customservice表清一下，否则上次程序退出会有残留的数据删不掉
+        initService.initCustomservice();
         ExecutorService executorService = Executors.newCachedThreadPool();
         for (Csadstate csadstate : csadstateList) {
             executorService.execute(new CsadRunnable(csadstate.getCsadid(),
@@ -63,6 +65,7 @@ public class Main implements CommandLineRunner {
                     messagetempRepository,
                     servicelogRepository,
                     customserviceRepository,
+                    cacsiresultRepository,
                     customConfig,
                     random));
         }
