@@ -25,5 +25,5 @@ public interface SendService {
 
     String send(HttpClient httpClient, UriEnum uriEnum, String params);
 
-    String send(HttpClient httpClient, URI uri, HttpMethod httpMethod, String params);
+    String send(HttpClient httpClient, URI uri, HttpMethod httpMethod, String referer, String params);
 }

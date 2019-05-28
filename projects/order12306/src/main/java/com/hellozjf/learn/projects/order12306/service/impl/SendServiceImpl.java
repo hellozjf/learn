@@ -77,15 +77,21 @@ public class SendServiceImpl implements SendService {
     public String send(HttpClient httpClient, UriEnum uriEnum, String params) {
         URI uri = uriService.getUri(uriEnum, params);
         HttpMethod httpMethod = uriEnum.getHttpMethod();
-        return send(httpClient, uri, httpMethod, params);
+        String referer = uriEnum.getReferer();
+        return send(httpClient, uri, httpMethod, referer, params);
     }
 
     @Override
-    public String send(HttpClient httpClient, URI uri, HttpMethod httpMethod, String params) {
+    public String send(HttpClient httpClient, URI uri, HttpMethod httpMethod, String referer, String params) {
         HttpRequest.Builder httpRequestBuilder = HttpRequest.newBuilder(uri);
+        httpRequestBuilder.header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
+        httpRequestBuilder.header("Referer", referer);
+//        httpRequestBuilder.header("Accept", "*/*");
+//        httpRequestBuilder.header("Accept-Encoding", "gzip, deflate");
+//        httpRequestBuilder.header("Accept-Language", "zh-Hans-CN,zh-Hans;q=0.8,en-US;q=0.5,en;q=0.3");
         if (httpMethod.equals(HttpMethod.POST)) {
             httpRequestBuilder
-                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                     .POST(HttpRequest.BodyPublishers.ofString(params));
         }
         HttpRequest httpRequest = httpRequestBuilder.build();

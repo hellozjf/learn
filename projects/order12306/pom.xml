@@ -12,6 +12,10 @@
     <groupId>com.hellozjf.learn.projects</groupId>
     <artifactId>order12306</artifactId>
 
+    <properties>
+        <java.version>11</java.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -46,9 +46,6 @@ public class Order12306ApplicationTests {
     private SendService sendService;
 
     @Autowired
-    private UriService uriService;
-
-    @Autowired
     private CookieService cookieService;
 
     @Autowired
@@ -81,26 +78,6 @@ public class Order12306ApplicationTests {
         String result =
                 sendService.send(httpClient,
                         UriEnum.OTN_HTTPZF_GETJS,
-                        params);
-        log.debug("result = {}", result);
-        return result;
-    }
-
-    private String index() {
-        Map<Object, Object> params = UriEnum.INDEX.getParams();
-        String result =
-                sendService.send(httpClient,
-                        UriEnum.INDEX,
-                        params);
-        log.debug("result = {}", result);
-        return result;
-    }
-
-    private String indexFontsIconfontTtf() {
-        Map<Object, Object> params = UriEnum.INDEX_FONTS_ICONFONT.getParams();
-        String result =
-                sendService.send(httpClient,
-                        UriEnum.INDEX_FONTS_ICONFONT,
                         params);
         log.debug("result = {}", result);
         return result;
@@ -356,9 +333,7 @@ public class Order12306ApplicationTests {
     @Test
     public void testAll() throws Exception {
 
-        index();
         otnHttpZFGetJS();
-        indexFontsIconfontTtf();
         otnHttpZFLogdevice();
         passportWebAuthUamtkStatic();
         otnLoginConf();
