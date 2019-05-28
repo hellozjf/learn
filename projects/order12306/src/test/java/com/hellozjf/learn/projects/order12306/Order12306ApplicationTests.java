@@ -73,7 +73,7 @@ public class Order12306ApplicationTests {
         this.password = "Zjf@1234";
     }
 
-    private String otnHttpZFGetJS() {
+    private String otnHttpZFGetJS() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.OTN_HTTPZF_GETJS.getParams();
         String result =
                 sendService.send(httpClient,
@@ -83,7 +83,7 @@ public class Order12306ApplicationTests {
         return result;
     }
 
-    private ResultLogdeviceDTO otnHttpZFLogdevice() {
+    private ResultLogdeviceDTO otnHttpZFLogdevice() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.OTN_HTTPZF_LOGDEVICE.getParams();
         params.put("timestamp", TimeUtils.currentTimeMillisStr());
         ResultLogdeviceDTO resultLogdeviceDTO =
@@ -107,7 +107,7 @@ public class Order12306ApplicationTests {
         return resultLogdeviceDTO;
     }
 
-    private String otnResourcesLoginHtml() {
+    private String otnResourcesLoginHtml() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.OTN_RESOURCES_LOGIN_HTML.getParams();
         String result =
                 sendService.send(httpClient,
@@ -117,7 +117,7 @@ public class Order12306ApplicationTests {
         return result;
     }
 
-    private ResultNormalDTO<OtnLoginConfDataDTO> otnLoginConf() throws JsonProcessingException {
+    private ResultNormalDTO<OtnLoginConfDataDTO> otnLoginConf() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.OTN_LOGIN_CONF.getParams();
         ResultNormalDTO<OtnLoginConfDataDTO> resultNormalDTO =
                 sendService.send(httpClient,
@@ -130,7 +130,7 @@ public class Order12306ApplicationTests {
         return resultNormalDTO;
     }
 
-    private ResultNormalDTO<OtnIndex12306GetLoginBannerDataDTO> otnIndex12306GetLoginBanner() throws JsonProcessingException {
+    private ResultNormalDTO<OtnIndex12306GetLoginBannerDataDTO> otnIndex12306GetLoginBanner() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.OTN_INDEX12306_GETLOGINBANNER.getParams();
         ResultNormalDTO<OtnIndex12306GetLoginBannerDataDTO> resultNormalDTO =
                 sendService.send(httpClient,
@@ -143,7 +143,7 @@ public class Order12306ApplicationTests {
         return resultNormalDTO;
     }
 
-    private ResultUamtkStaticDTO passportWebAuthUamtkStatic() throws JsonProcessingException {
+    private ResultUamtkStaticDTO passportWebAuthUamtkStatic() throws IOException, InterruptedException {
         List<HttpCookie> httpCookieList = cookieService.getAll(httpClient, site12306CookieUri);
         log.debug("httpCookieList = {}", httpCookieList);
         Map<Object, Object> params = UriEnum.PASSPORT_WEB_AUTH_UAMTK_STATIC.getParams();
@@ -158,7 +158,7 @@ public class Order12306ApplicationTests {
         return resultUamtkStaticDTO;
     }
 
-    private ResultImageDTO passportCaptchaCaptchaImage64() throws JsonProcessingException {
+    private ResultImageDTO passportCaptchaCaptchaImage64() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.PASSPORT_CAPTCHA_CAPTCHA_IMAGE64.getParams();
         params.put(TimeUtils.currentTimeMillisStr(), null);
         ResultImageDTO resultImageDTO =
@@ -174,7 +174,7 @@ public class Order12306ApplicationTests {
         return resultImageDTO;
     }
 
-    private AnswerDTO getAnswer() throws JsonProcessingException {
+    private AnswerDTO getAnswer() throws IOException, InterruptedException {
         String base64String = cookieService.get(httpClient, customCookieUri, CookieService.IMAGE);
         Map<Object, Object> params = UriEnum.GET_ANSWER.getParams();
         params.put("base64String", base64String);
@@ -190,7 +190,7 @@ public class Order12306ApplicationTests {
         return answerDTO;
     }
 
-    private ResultImageDTO passportCaptchaCaptchaCheck() throws JsonProcessingException {
+    private ResultImageDTO passportCaptchaCaptchaCheck() throws IOException, InterruptedException {
         String answer = cookieService.get(httpClient, customCookieUri, CookieService.ANSWER);
         Map<Object, Object> params = UriEnum.PASSPORT_CAPTCHA_CAPTCHA_CHECK.getParams();
         params.put("answer", answer);
@@ -207,37 +207,24 @@ public class Order12306ApplicationTests {
         return resultImageDTO;
     }
 
-    private ResultLoginDTO passportWebLogin(int tryCount) throws IOException {
+    private ResultLoginDTO passportWebLogin() throws IOException, InterruptedException {
         String answer = cookieService.get(httpClient, customCookieUri, CookieService.ANSWER);
         Map<Object, Object> params = UriEnum.PASSPORT_WEB_LOGIN.getParams();
         params.put("username", username);
         params.put("password", password);
         params.put("answer", answer);
-        ResultLoginDTO resultLoginDTO = null;
-        for (int i = 0; i < tryCount; i++) {
-            String result =
-                    sendService.send(httpClient,
-                            UriEnum.PASSPORT_WEB_LOGIN,
-                            params);
-            if (!StringUtils.isEmpty(result)) {
-                resultLoginDTO = objectMapper.readValue(result, ResultLoginDTO.class);
-                break;
-            }
-
-            // 空字符串，等待1秒后重试
-            try {
-                log.debug("{}没有任何返回，等待1秒重试", UriEnum.PASSPORT_WEB_LOGIN.getPath());
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                log.error("e = {}", e);
-            }
-        }
+        ResultLoginDTO resultLoginDTO =
+                sendService.send(httpClient,
+                        UriEnum.PASSPORT_WEB_LOGIN,
+                        params,
+                        new TypeReference<ResultLoginDTO>() {
+                        });
         log.debug("resultLoginDTO={}",
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultLoginDTO));
         return resultLoginDTO;
     }
 
-    public String otnLoginUserLogin() {
+    private String otnLoginUserLogin() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.OTN_LOGIN_USER_LOGIN.getParams();
         String result =
                 sendService.send(httpClient,
@@ -247,7 +234,17 @@ public class Order12306ApplicationTests {
         return result;
     }
 
-    private String otnPassport() {
+    private String otnLoginInit() throws IOException, InterruptedException {
+        Map<Object, Object> params = UriEnum.OTN_LOGIN_INIT.getParams();
+        String result =
+                sendService.send(httpClient,
+                        UriEnum.OTN_LOGIN_INIT,
+                        params);
+        log.debug("result={}", result);
+        return result;
+    }
+
+    private String otnPassport() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.OTN_PASSPORT.getParams();
         String result =
                 sendService.send(httpClient,
@@ -257,7 +254,7 @@ public class Order12306ApplicationTests {
         return result;
     }
 
-    private ResultLoginDTO passportWebAuthUamtk() throws JsonProcessingException {
+    private ResultLoginDTO passportWebAuthUamtk() throws IOException, InterruptedException {
         Map<Object, Object> params = UriEnum.PASSPORT_WEB_AUTH_UAMTK.getParams();
         ResultLoginDTO resultLoginDTO =
                 sendService.send(httpClient,
@@ -271,7 +268,7 @@ public class Order12306ApplicationTests {
         return resultLoginDTO;
     }
 
-    private ResultLoginDTO otnUamauthclient() throws JsonProcessingException {
+    private ResultLoginDTO otnUamauthclient() throws IOException, InterruptedException {
         String tk = cookieService.get(httpClient, customCookieUri, CookieService.TK);
         Map<Object, Object> params = UriEnum.OTN_UAMAUTHCLIENT.getParams();
         params.put("tk", tk);
@@ -286,69 +283,35 @@ public class Order12306ApplicationTests {
         return resultLoginDTO;
     }
 
-    private void saveCookie(HttpClient httpClient, String username) {
-        File parent = new File("cookie");
-        parent.mkdirs();
-        List<HttpCookie> httpCookieList = cookieService.getAll(httpClient, site12306CookieUri);
-        File file = new File(parent, username);
-        try (FileOutputStream fileOutputStream = new FileOutputStream(file);
-             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
-            String str = objectMapper.writeValueAsString(httpCookieList);
-            objectOutputStream.writeObject(str);
-        } catch (Exception e) {
-            log.error("e = {}", e);
-        }
-    }
-
-    private void loadCookie(HttpClient httpClient, String username) {
-        File parent = new File("cookie");
-        parent.mkdirs();
-        File file = new File(parent, username);
-        if (!file.exists()) {
-            return;
-        }
-        try (FileInputStream fileInputStream = new FileInputStream(file);
-             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-            String str = (String) objectInputStream.readObject();
-            ArrayNode arrayNode = (ArrayNode) objectMapper.readTree(str);
-            for (JsonNode jsonNode : arrayNode) {
-                HttpCookie httpCookie = new HttpCookie(jsonNode.get("name").asText(), jsonNode.get("value").asText());
-                httpCookie.setComment(jsonNode.get("comment").asText());
-                httpCookie.setCommentURL(jsonNode.get("commentURL").asText());
-                httpCookie.setDomain(jsonNode.get("domain").asText());
-                httpCookie.setMaxAge(jsonNode.get("maxAge").asLong());
-                httpCookie.setPath(jsonNode.get("path").asText());
-                httpCookie.setPortlist(jsonNode.get("portlist").asText());
-                httpCookie.setSecure(jsonNode.get("secure").booleanValue());
-                httpCookie.setHttpOnly(jsonNode.get("httpOnly").booleanValue());
-                httpCookie.setVersion(jsonNode.get("version").intValue());
-                httpCookie.setDiscard(jsonNode.get("discard").booleanValue());
-                cookieService.add(httpClient, site12306CookieUri, httpCookie);
-            }
-        } catch (Exception e) {
-            log.error("e = {}", e);
-        }
+    private String otnResourcesJsFrameworkStationNameJs() throws IOException, InterruptedException {
+        Map<Object, Object> params = UriEnum.OTN_RESOURCES_JS_FRAMEWORK_STATION_NAME_JS.getParams();
+        String result =
+                sendService.send(httpClient,
+                        UriEnum.OTN_RESOURCES_JS_FRAMEWORK_STATION_NAME_JS,
+                        params);
+        log.debug("result={}",
+                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+        return result;
     }
 
     @Test
     public void testAll() throws Exception {
-
-        otnHttpZFGetJS();
-        otnHttpZFLogdevice();
-        passportWebAuthUamtkStatic();
-        otnLoginConf();
-        otnIndex12306GetLoginBanner();
-        passportWebAuthUamtkStatic();
-        passportCaptchaCaptchaImage64();
-        getAnswer();
-        passportCaptchaCaptchaCheck();
-        if (passportWebLogin(10) == null) {
-            log.error("null");
-            return;
-        }
-        otnLoginUserLogin();
-        otnPassport();
-        passportWebAuthUamtk();
-        otnUamauthclient();
+        otnResourcesJsFrameworkStationNameJs();
+//        otnLoginInit();
+//        otnHttpZFGetJS();
+//        otnHttpZFLogdevice();
+//        passportWebAuthUamtkStatic();
+//        otnResourcesLoginHtml();
+//        otnLoginConf();
+//        otnIndex12306GetLoginBanner();
+//        passportWebAuthUamtkStatic();
+//        passportCaptchaCaptchaImage64();
+//        getAnswer();
+//        passportCaptchaCaptchaCheck();
+//        passportWebLogin();
+//        otnLoginUserLogin();
+//        otnPassport();
+//        passportWebAuthUamtk();
+//        otnUamauthclient();
     }
 }

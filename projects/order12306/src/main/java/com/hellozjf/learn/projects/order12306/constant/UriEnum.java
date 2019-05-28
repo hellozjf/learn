@@ -14,21 +14,18 @@ import java.util.Map;
 @AllArgsConstructor
 public enum UriEnum {
 
-//    INDEX(HttpMethod.GET, "https", "www.12306.cn", -1,
-//            "/index/",
-//            index()),
-//    INDEX_FONTS_ICONFONT(HttpMethod.GET, "https", "www.12306.cn", -1,
-//            "/index/fonts/iconfont.ttf",
-//            indexFontsIconfontTtf()),
-//    INDEX_OTN_INDEX12306_GETBANNER(HttpMethod.GET, "https", "www.12306.cn", -1,
-//            "/index/otn/index12306/getBanner",
-//            indexOtnIndex12306GetBanner()),
+    OTN_RESOURCES_JS_FRAMEWORK_STATION_NAME_JS(HttpMethod.GET, "https", "kyfw.12306.cn", -1,
+            "/otn/resources/js/framework/station_name.js", "",
+            otnResourcesJsFrameworkStationNameJs()),
     OTN_HTTPZF_GETJS(HttpMethod.GET, "https", "kyfw.12306.cn", -1,
             "/otn/HttpZF/GetJS", "https://www.12306.cn/index/",
             otnHttpzfGetjs()),
     OTN_HTTPZF_LOGDEVICE(HttpMethod.GET, "https", "kyfw.12306.cn", -1,
             "/otn/HttpZF/logdevice", "https://www.12306.cn/index/",
             otnHttpZFLogdevice()),
+    OTN_LOGIN_INIT(HttpMethod.GET, "https", "kyfw.12306.cn", -1,
+            "/otn/login/init", "https://kyfw.12306.cn/otn/index/init",
+            otnLoginInit()),
     OTN_RESOURCES_LOGIN_HTML(HttpMethod.GET, "https", "kyfw.12306.cn", -1,
             "/otn/resources/login.html", "https://www.12306.cn/index/",
             otnResourcesLoginHtml()),
@@ -66,6 +63,16 @@ public enum UriEnum {
             "/otn/uamauthclient", "https://kyfw.12306.cn/otn/passport?redirect=/otn/login/userLogin",
             getOtnUamauthclientMap()),
     ;
+
+    private static Map<Object, Object> otnResourcesJsFrameworkStationNameJs() {
+        Map<Object, Object> params = new HashMap<>();
+        return params;
+    }
+
+    private static Map<Object, Object> otnLoginInit() {
+        Map<Object, Object> params = new HashMap<>();
+        return params;
+    }
 
     private static Map<Object, Object> indexOtnIndex12306GetBanner() {
         Map<Object, Object> params = new HashMap<>();
