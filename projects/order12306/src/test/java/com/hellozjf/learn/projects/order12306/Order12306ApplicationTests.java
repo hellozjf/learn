@@ -1,317 +1,244 @@
 package com.hellozjf.learn.projects.order12306;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.hellozjf.learn.projects.order12306.constant.UriEnum;
-import com.hellozjf.learn.projects.order12306.dto.*;
-import com.hellozjf.learn.projects.order12306.service.CookieService;
-import com.hellozjf.learn.projects.order12306.service.SendService;
-import com.hellozjf.learn.projects.order12306.service.UriService;
-import com.hellozjf.learn.projects.order12306.util.TimeUtils;
+import com.hellozjf.learn.projects.order12306.dto.ResultDTO;
+import com.hellozjf.learn.projects.order12306.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.*;
-import java.net.CookieManager;
-import java.net.HttpCookie;
+import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Slf4j
 public class Order12306ApplicationTests {
 
-    private HttpClient httpClient;
-    private String username;
-    private String password;
-
-    @Autowired
+    private CookieStore cookieStore;
+    private CloseableHttpClient httpclient;
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private SendService sendService;
-
-    @Autowired
-    private CookieService cookieService;
-
-    @Autowired
-    @Qualifier("customCookieUri")
-    private URI customCookieUri;
-
-    @Autowired
-    @Qualifier("site12306CookieUri")
-    private URI site12306CookieUri;
 
     @Before
     public void before() {
+        cookieStore = cookieStore();
+        httpclient = getProxyHttpClient(cookieStore);
+        objectMapper = new ObjectMapper();
+    }
 
-//        System.setProperty("java.net.useSystemProxies", "true");      // 没用，必须写在启动命令里面
-//        System.setProperty("http.proxyHost", "127.0.0.1");
-//        System.setProperty("http.proxyPort", "8888");
-//        System.setProperty("https.proxyHost", "127.0.0.1");
-//        System.setProperty("https.proxyPort", "8888");
-
-        CookieManager cookieManager = new CookieManager();
-        this.httpClient = HttpClient.newBuilder()
-                .cookieHandler(cookieManager)
+    private void otnHttpZFGetJS() throws IOException, URISyntaxException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/HttpZF/GetJS")
                 .build();
-        this.username = "15158037019";
-        this.password = "Zjf@1234";
+        HttpGet httpget = new HttpGet(uri);
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        getResponse(response);
     }
 
-    private String otnHttpZFGetJS() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_HTTPZF_GETJS.getParams();
-        String result =
-                sendService.send(httpClient,
-                        UriEnum.OTN_HTTPZF_GETJS,
-                        params);
-        log.debug("result = {}", result);
-        return result;
-    }
+    private void otnHttpZFLogdevice() throws IOException, URISyntaxException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/HttpZF/logdevice")
+                .setParameter("algID", "B1yZP5nZFD")
+                .setParameter("hashCode", "FGzlY5ZPKbBlR5vAJscQioAhxZM_aEjZmEJBooIXYHI")
+                .setParameter("FMQw", "1")
+                .setParameter("q4f3", "zh-CN")
+                .setParameter("VPIf", "1")
+                .setParameter("custID", "133")
+                .setParameter("VEek", "unknown")
+                .setParameter("dzuS", "0")
+                .setParameter("yD16", "0")
+                .setParameter("EOQP", "8f58b1186770646318a429cb33977d8c")
+                .setParameter("lEnu", "3232236319")
+                .setParameter("jp76", "52d67b2a5aa5e031084733d5006cc664")
+                .setParameter("hAqN", "Win32")
+                .setParameter("platform", "WEB")
+                .setParameter("ks0Q", "d22ca0b81584fbea62237b14bd04c866")
+                .setParameter("TeRS", "860x1600")
+                .setParameter("tOHY", "24xx900x1600")
+                .setParameter("Fvje", "i1l1o1s1")
+                .setParameter("q5aJ", "-8")
+                .setParameter("wNLf", "99115dfb07133750ba677d055874de87")
+                .setParameter("0aew", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36")
+                .setParameter("E3gR", "d57736fc5698a73751a8dedad5cb8c3c")
+                .setParameter("timestamp", String.valueOf(System.currentTimeMillis()))
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        String responseString = getResponse(response);
+        responseString = RegexUtils.getMatch(responseString, ".*\\('(.*)'\\)");
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        log.debug("resultDTO = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultDTO));
 
-    private ResultLogdeviceDTO otnHttpZFLogdevice() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_HTTPZF_LOGDEVICE.getParams();
-        params.put("timestamp", TimeUtils.currentTimeMillisStr());
-        ResultLogdeviceDTO resultLogdeviceDTO =
-                sendService.send(httpClient,
-                        UriEnum.OTN_HTTPZF_LOGDEVICE,
-                        params,
-                        ".*\\('(.*)'\\)",
-                        new TypeReference<ResultLogdeviceDTO>() {
-                        });
-        log.debug("resultLogdeviceDTO = {}", resultLogdeviceDTO);
-        HttpCookie railExpiration = new HttpCookie(CookieService.RAIL_EXPIRATION, resultLogdeviceDTO.getExp());
-        railExpiration.setDomain(".12306.cn");
-        railExpiration.setPath("/");
+        log.debug("cookies = {}", cookieStore.getCookies());
+
+        BasicClientCookie railExpiration = new BasicClientCookie("RAIL_EXPIRATION", resultDTO.getExp());
         railExpiration.setVersion(0);
-        HttpCookie railDeviceid = new HttpCookie(CookieService.RAIL_DEVICEID, resultLogdeviceDTO.getDfp());
-        railDeviceid.setDomain(".12306.cn");
-        railDeviceid.setPath("/");
+        railExpiration.setDomain("kyfw.12306.cn");
+        railExpiration.setPath("/");
+        BasicClientCookie railDeviceid = new BasicClientCookie("RAIL_DEVICEID", resultDTO.getDfp());
         railDeviceid.setVersion(0);
-        cookieService.add(httpClient, site12306CookieUri, railExpiration);
-        cookieService.add(httpClient, site12306CookieUri, railDeviceid);
-        return resultLogdeviceDTO;
+        railDeviceid.setDomain("kyfw.12306.cn");
+        railDeviceid.setPath("/");
+        cookieStore.addCookie(railExpiration);
+        cookieStore.addCookie(railDeviceid);
     }
 
-    private String otnResourcesLoginHtml() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_RESOURCES_LOGIN_HTML.getParams();
-        String result =
-                sendService.send(httpClient,
-                        UriEnum.OTN_RESOURCES_LOGIN_HTML,
-                        params);
-        log.debug("result = {}", result);
-        return result;
+    private void passportWebAuthUamtkStatic() throws IOException, URISyntaxException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/passport/web/auth/uamtk-static")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("appid", "otn"));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        log.debug("cookies = {}", cookieStore.getCookies());
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        getResponse(response);
     }
 
-    private ResultNormalDTO<OtnLoginConfDataDTO> otnLoginConf() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_LOGIN_CONF.getParams();
-        ResultNormalDTO<OtnLoginConfDataDTO> resultNormalDTO =
-                sendService.send(httpClient,
-                        UriEnum.OTN_LOGIN_CONF,
-                        params,
-                        new TypeReference<ResultNormalDTO<OtnLoginConfDataDTO>>() {
-                        });
-        log.debug("resultNormalDTO = {}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultNormalDTO));
-        return resultNormalDTO;
+    private void otnLoginConf() throws IOException, URISyntaxException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/login/conf")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
     }
 
-    private ResultNormalDTO<OtnIndex12306GetLoginBannerDataDTO> otnIndex12306GetLoginBanner() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_INDEX12306_GETLOGINBANNER.getParams();
-        ResultNormalDTO<OtnIndex12306GetLoginBannerDataDTO> resultNormalDTO =
-                sendService.send(httpClient,
-                        UriEnum.OTN_INDEX12306_GETLOGINBANNER,
-                        params,
-                        new TypeReference<ResultNormalDTO<OtnIndex12306GetLoginBannerDataDTO>>() {
-                        });
-        log.debug("resultNormalDTO = {}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultNormalDTO));
-        return resultNormalDTO;
+    private void otnIndex12306GetLoginBanner() throws IOException, URISyntaxException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/index12306/getLoginBanner")
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
     }
 
-    private ResultUamtkStaticDTO passportWebAuthUamtkStatic() throws IOException, InterruptedException {
-        List<HttpCookie> httpCookieList = cookieService.getAll(httpClient, site12306CookieUri);
-        log.debug("httpCookieList = {}", httpCookieList);
-        Map<Object, Object> params = UriEnum.PASSPORT_WEB_AUTH_UAMTK_STATIC.getParams();
-        ResultUamtkStaticDTO resultUamtkStaticDTO =
-                sendService.send(httpClient,
-                        UriEnum.PASSPORT_WEB_AUTH_UAMTK_STATIC,
-                        params,
-                        new TypeReference<ResultUamtkStaticDTO>() {
-                        });
-        log.debug("resultUamtkStaticDTO = {}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultUamtkStaticDTO));
-        return resultUamtkStaticDTO;
+    private String passportCaptchaCaptchaImage64() throws IOException, URISyntaxException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/passport/captcha/captcha-image64")
+                .setParameter("login_site", "E")
+                .setParameter("module", "login")
+                .setParameter("rand", "sjrand")
+                .setParameter("1559731492080", null)
+                .setParameter("callback", "jQuery19104205457370736725_1559731489947")
+                .setParameter("_", "1559731489948")
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+        String image = RegexUtils.getMatch(responseString, ".*\\((.*)\\)");
+        ResultDTO resultDTO = objectMapper.readValue(image, new TypeReference<ResultDTO>(){});
+        return resultDTO.getImage();
     }
 
-    private ResultImageDTO passportCaptchaCaptchaImage64() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.PASSPORT_CAPTCHA_CAPTCHA_IMAGE64.getParams();
-        params.put(TimeUtils.currentTimeMillisStr(), null);
-        ResultImageDTO resultImageDTO =
-                sendService.send(httpClient,
-                        UriEnum.PASSPORT_CAPTCHA_CAPTCHA_IMAGE64,
-                        params,
-                        ".*\\((.*)\\)",
-                        new TypeReference<ResultImageDTO>() {
-                        });
-        log.debug("resultImageDTO={}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultImageDTO));
-        cookieService.add(httpClient, customCookieUri, CookieService.IMAGE, resultImageDTO.getImage());
-        return resultImageDTO;
+    private void getCheck(String image) throws IOException, URISyntaxException {
+        URI uri = new URIBuilder()
+                .setScheme("http")
+                .setHost("aliyun.hellozjf.com")
+                .setPort(12306)
+                .setPath("/result/base64")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("base64String", image));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
     }
 
-    private AnswerDTO getAnswer() throws IOException, InterruptedException {
-        String base64String = cookieService.get(httpClient, customCookieUri, CookieService.IMAGE);
-        Map<Object, Object> params = UriEnum.GET_ANSWER.getParams();
-        params.put("base64String", base64String);
-        AnswerDTO answerDTO =
-                sendService.send(httpClient,
-                        UriEnum.GET_ANSWER,
-                        params,
-                        new TypeReference<AnswerDTO>() {
-                        });
-        log.debug("answerDTO={}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(answerDTO));
-        cookieService.add(httpClient, customCookieUri, CookieService.ANSWER, answerDTO.getData());
-        return answerDTO;
-    }
-
-    private ResultImageDTO passportCaptchaCaptchaCheck() throws IOException, InterruptedException {
-        String answer = cookieService.get(httpClient, customCookieUri, CookieService.ANSWER);
-        Map<Object, Object> params = UriEnum.PASSPORT_CAPTCHA_CAPTCHA_CHECK.getParams();
-        params.put("answer", answer);
-        params.put("_", TimeUtils.currentTimeMillisStr());
-        ResultImageDTO resultImageDTO =
-                sendService.send(httpClient,
-                        UriEnum.PASSPORT_CAPTCHA_CAPTCHA_CHECK,
-                        params,
-                        ".*\\((.*)\\)",
-                        new TypeReference<ResultImageDTO>() {
-                        });
-        log.debug("resultImageDTO={}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultImageDTO));
-        return resultImageDTO;
-    }
-
-    private ResultLoginDTO passportWebLogin() throws IOException, InterruptedException {
-        String answer = cookieService.get(httpClient, customCookieUri, CookieService.ANSWER);
-        Map<Object, Object> params = UriEnum.PASSPORT_WEB_LOGIN.getParams();
-        params.put("username", username);
-        params.put("password", password);
-        params.put("answer", answer);
-        ResultLoginDTO resultLoginDTO =
-                sendService.send(httpClient,
-                        UriEnum.PASSPORT_WEB_LOGIN,
-                        params,
-                        new TypeReference<ResultLoginDTO>() {
-                        });
-        log.debug("resultLoginDTO={}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultLoginDTO));
-        return resultLoginDTO;
-    }
-
-    private String otnLoginUserLogin() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_LOGIN_USER_LOGIN.getParams();
-        String result =
-                sendService.send(httpClient,
-                        UriEnum.OTN_LOGIN_USER_LOGIN,
-                        params);
-        log.debug("result={}", result);
-        return result;
-    }
-
-    private String otnLoginInit() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_LOGIN_INIT.getParams();
-        String result =
-                sendService.send(httpClient,
-                        UriEnum.OTN_LOGIN_INIT,
-                        params);
-        log.debug("result={}", result);
-        return result;
-    }
-
-    private String otnPassport() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_PASSPORT.getParams();
-        String result =
-                sendService.send(httpClient,
-                        UriEnum.OTN_PASSPORT,
-                        params);
-        log.debug("result={}", result);
-        return result;
-    }
-
-    private ResultLoginDTO passportWebAuthUamtk() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.PASSPORT_WEB_AUTH_UAMTK.getParams();
-        ResultLoginDTO resultLoginDTO =
-                sendService.send(httpClient,
-                        UriEnum.PASSPORT_WEB_AUTH_UAMTK,
-                        params,
-                        new TypeReference<ResultLoginDTO>() {
-                        });
-        log.debug("resultLoginDTO={}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultLoginDTO));
-        cookieService.add(httpClient, customCookieUri, CookieService.TK, resultLoginDTO.getNewapptk());
-        return resultLoginDTO;
-    }
-
-    private ResultLoginDTO otnUamauthclient() throws IOException, InterruptedException {
-        String tk = cookieService.get(httpClient, customCookieUri, CookieService.TK);
-        Map<Object, Object> params = UriEnum.OTN_UAMAUTHCLIENT.getParams();
-        params.put("tk", tk);
-        ResultLoginDTO resultLoginDTO =
-                sendService.send(httpClient,
-                        UriEnum.OTN_UAMAUTHCLIENT,
-                        params,
-                        new TypeReference<ResultLoginDTO>() {
-                        });
-        log.debug("resultLoginDTO={}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultLoginDTO));
-        return resultLoginDTO;
-    }
-
-    private String otnResourcesJsFrameworkStationNameJs() throws IOException, InterruptedException {
-        Map<Object, Object> params = UriEnum.OTN_RESOURCES_JS_FRAMEWORK_STATION_NAME_JS.getParams();
-        String result =
-                sendService.send(httpClient,
-                        UriEnum.OTN_RESOURCES_JS_FRAMEWORK_STATION_NAME_JS,
-                        params);
-        log.debug("result={}",
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
-        return result;
+    private String getResponse(CloseableHttpResponse response) throws IOException {
+        try {
+            HttpEntity httpEntity = response.getEntity();
+            if (httpEntity != null) {
+                String responseString = EntityUtils.toString(httpEntity);
+//                log.debug("{}", responseString);
+                return responseString;
+            }
+        } finally {
+            response.close();
+        }
+        return null;
     }
 
     @Test
-    public void testAll() throws Exception {
-        otnResourcesJsFrameworkStationNameJs();
-//        otnLoginInit();
-//        otnHttpZFGetJS();
-//        otnHttpZFLogdevice();
-//        passportWebAuthUamtkStatic();
-//        otnResourcesLoginHtml();
-//        otnLoginConf();
-//        otnIndex12306GetLoginBanner();
-//        passportWebAuthUamtkStatic();
-//        passportCaptchaCaptchaImage64();
-//        getAnswer();
-//        passportCaptchaCaptchaCheck();
-//        passportWebLogin();
-//        otnLoginUserLogin();
-//        otnPassport();
-//        passportWebAuthUamtk();
-//        otnUamauthclient();
+    public void login() throws IOException, URISyntaxException {
+        otnHttpZFGetJS();
+        otnHttpZFLogdevice();
+        passportWebAuthUamtkStatic();
+        otnLoginConf();
+        otnIndex12306GetLoginBanner();
+        passportWebAuthUamtkStatic();
+        String image = passportCaptchaCaptchaImage64();
+        getCheck(image);
+    }
+
+    private CloseableHttpClient getProxyHttpClient(CookieStore cookieStore) {
+        return HttpClients.custom()
+                .setProxy(new HttpHost("localhost", 8888))
+                .setDefaultCookieStore(cookieStore)
+                .build();
+    }
+
+    private CloseableHttpClient getHttpClient(CookieStore cookieStore) {
+        return HttpClients.custom()
+                .setDefaultCookieStore(cookieStore)
+                .build();
+    }
+
+    private CookieStore cookieStore() {
+        return new BasicCookieStore();
     }
 }
