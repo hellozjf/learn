@@ -5,21 +5,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hellozjf.learn.projects.order12306.dto.ResultDTO;
 import com.hellozjf.learn.projects.order12306.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.cookie.ClientCookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,12 +43,14 @@ public class Order12306ApplicationTests {
     private CookieStore cookieStore;
     private CloseableHttpClient httpclient;
     private ObjectMapper objectMapper;
+    private Random random;
 
     @Before
     public void before() {
         cookieStore = cookieStore();
         httpclient = getProxyHttpClient(cookieStore);
         objectMapper = new ObjectMapper();
+        random = new Random();
     }
 
     private void otnHttpZFGetJS() throws IOException, URISyntaxException {
@@ -98,16 +102,8 @@ public class Order12306ApplicationTests {
 
         log.debug("cookies = {}", cookieStore.getCookies());
 
-        BasicClientCookie railExpiration = new BasicClientCookie("RAIL_EXPIRATION", resultDTO.getExp());
-        railExpiration.setVersion(0);
-        railExpiration.setDomain("kyfw.12306.cn");
-        railExpiration.setPath("/");
-        BasicClientCookie railDeviceid = new BasicClientCookie("RAIL_DEVICEID", resultDTO.getDfp());
-        railDeviceid.setVersion(0);
-        railDeviceid.setDomain("kyfw.12306.cn");
-        railDeviceid.setPath("/");
-        cookieStore.addCookie(railExpiration);
-        cookieStore.addCookie(railDeviceid);
+        addCookie(cookieStore, "RAIL_EXPIRATION", resultDTO.getExp());
+        addCookie(cookieStore, "RAIL_DEVICEID", resultDTO.getDfp());
     }
 
     private void passportWebAuthUamtkStatic() throws IOException, URISyntaxException {
@@ -198,7 +194,7 @@ public class Order12306ApplicationTests {
         String responseString = getResponse(response);
         log.debug("responseString = {}", responseString);
         ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {});
-        return resultDTO.getData();
+        return resultDTO.getData().asText();
     }
 
     private void passportCaptchaCaptchaCheck(String check) throws URISyntaxException, IOException {
@@ -306,6 +302,80 @@ public class Order12306ApplicationTests {
         log.debug("responseString = {}", responseString);
     }
 
+    private void otnLeftTicketInit() throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/leftTicket/init")
+                .setParameter("linktypeid", "dc")
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        String responseString = getResponse(response);
+    }
+
+    private void otnLeftTicketQuery(String trainDate, String fromStation, String toStation) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/leftTicket/query")
+                .setParameter("leftTicketDTO.train_date", trainDate)
+                .setParameter("leftTicketDTO.from_station", fromStation)
+                .setParameter("leftTicketDTO.to_station", toStation)
+                .setParameter("purpose_codes", "ADULT")
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        log.debug("result = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultDTO.getData().get("result")));
+    }
+
+    private void otnPasscodeNewGetPassCodeNew() throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/passcodeNew/getPassCodeNew")
+                .setParameter("module", "passenger")
+                .setParameter("rand", "randp")
+                .setParameter(String.valueOf(random.nextDouble()), null)
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        String responseString = getResponse(response);
+//        log.debug("responseString = {}", responseString);
+
+//        addCookie(cookieStore, "_jc_save_fromStation", "杭州,HZH");
+//        addCookie(cookieStore, "_jc_save_fromStation", "%u676D%u5DDE%2CHZH");
+//        addCookie(cookieStore, "_jc_save_toStation", "宁波,NGH");
+//        addCookie(cookieStore, "_jc_save_toStation", "%u5B81%u6CE2%2CNGH");
+//        addCookie(cookieStore, "_jc_save_fromDate", "2019-06-12");
+//        addCookie(cookieStore, "_jc_save_toDate", "2019-06-06");
+//        addCookie(cookieStore, "_jc_save_wfdc_flag", "dc");
+    }
+
+    private void otnLoginCheckUser() throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/login/checkUser")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("_json_att", ""));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
     private String getResponse(CloseableHttpResponse response) throws IOException {
         try {
             HttpEntity httpEntity = response.getEntity();
@@ -320,8 +390,7 @@ public class Order12306ApplicationTests {
         return null;
     }
 
-    @Test
-    public void login() throws IOException, URISyntaxException {
+    private void login() throws IOException, URISyntaxException {
         otnHttpZFGetJS();
         otnHttpZFLogdevice();
         passportWebAuthUamtkStatic();
@@ -340,6 +409,15 @@ public class Order12306ApplicationTests {
         otnIndexInitMy12306Api();
     }
 
+    @Test
+    public void order() throws IOException, URISyntaxException {
+        login();
+        otnLeftTicketInit();
+        otnPasscodeNewGetPassCodeNew();
+        otnLeftTicketQuery("2019-06-12", "HZH", "NGH");
+        otnLoginCheckUser();
+    }
+
     private CloseableHttpClient getProxyHttpClient(CookieStore cookieStore) {
         return HttpClients.custom()
                 .setProxy(new HttpHost("localhost", 8888))
@@ -355,5 +433,12 @@ public class Order12306ApplicationTests {
 
     private CookieStore cookieStore() {
         return new BasicCookieStore();
+    }
+
+    private void addCookie(CookieStore cookieStore, String name, String value) {
+        BasicClientCookie basicClientCookie = new BasicClientCookie(name, value);
+        basicClientCookie.setDomain("kyfw.12306.cn");
+        basicClientCookie.setPath("/");
+        cookieStore.addCookie(basicClientCookie);
     }
 }

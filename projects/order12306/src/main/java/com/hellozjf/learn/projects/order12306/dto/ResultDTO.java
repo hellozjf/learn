@@ -2,7 +2,11 @@ package com.hellozjf.learn.projects.order12306.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author Jingfeng Zhou
@@ -40,7 +44,7 @@ public class ResultDTO {
 
     @JsonProperty("data")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String data;
+    private JsonNode data;
 
     @JsonProperty("image")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -57,5 +61,21 @@ public class ResultDTO {
     @JsonProperty("username")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String username;
+
+    @JsonProperty("validateMessagesShowId")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String validateMessagesShowId;
+
+    @JsonProperty("status")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String status;
+
+    @JsonProperty("httpstatus")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String httpstatus;
+
+    @JsonProperty("messages")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String messages;
 
 }
