@@ -166,9 +166,9 @@ public class Order12306ApplicationTests {
                 .setParameter("login_site", "E")
                 .setParameter("module", "login")
                 .setParameter("rand", "sjrand")
-                .setParameter("1559731492080", null)
+                .setParameter(String.valueOf(System.currentTimeMillis()), null)
                 .setParameter("callback", "jQuery19104205457370736725_1559731489947")
-                .setParameter("_", "1559731489948")
+                .setParameter("_", String.valueOf(System.currentTimeMillis()))
                 .build();
         HttpGet httpget = new HttpGet(uri);
 
@@ -180,7 +180,7 @@ public class Order12306ApplicationTests {
         return resultDTO.getImage();
     }
 
-    private void getCheck(String image) throws IOException, URISyntaxException {
+    private String getCheck(String image) throws IOException, URISyntaxException {
         URI uri = new URIBuilder()
                 .setScheme("http")
                 .setHost("aliyun.hellozjf.com")
@@ -191,6 +191,113 @@ public class Order12306ApplicationTests {
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("base64String", image));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {});
+        return resultDTO.getData();
+    }
+
+    private void passportCaptchaCaptchaCheck(String check) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/passport/captcha/captcha-check")
+                .setParameter("callback", "jQuery19104205457370736725_1559731489947")
+                .setParameter("answer", check)
+                .setParameter("rand", "sjrand")
+                .setParameter("login_site", "E")
+                .setParameter("_", String.valueOf(System.currentTimeMillis()))
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
+    private void passportWebLogin(String username, String password, String answer) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/passport/web/login")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("username", username));
+        formparams.add(new BasicNameValuePair("password", password));
+        formparams.add(new BasicNameValuePair("appid", "otn"));
+        formparams.add(new BasicNameValuePair("answer", answer));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
+    private void otnLoginUserLogin() throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/login/userLogin")
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        getResponse(response);
+    }
+
+    private String passportWebAuthUamtk() throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/passport/web/auth/uamtk")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("appid", "otn"));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        return resultDTO.getNewapptk();
+    }
+
+    private void otnUamauthclient(String newapptk) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/uamauthclient")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("tk", newapptk));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
+    private void otnIndexInitMy12306Api() throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/index/initMy12306Api")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
         httppost.setEntity(entity);
 
@@ -222,7 +329,15 @@ public class Order12306ApplicationTests {
         otnIndex12306GetLoginBanner();
         passportWebAuthUamtkStatic();
         String image = passportCaptchaCaptchaImage64();
-        getCheck(image);
+        String check = getCheck(image);
+        passportCaptchaCaptchaCheck(check);
+        passportWebLogin("15158037019", "Zjf@1234", check);
+        otnLoginUserLogin();
+        String newapptk = passportWebAuthUamtk();
+        otnUamauthclient(newapptk);
+        otnLoginUserLogin();
+        otnLoginConf();
+        otnIndexInitMy12306Api();
     }
 
     private CloseableHttpClient getProxyHttpClient(CookieStore cookieStore) {

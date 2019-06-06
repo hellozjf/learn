@@ -45,4 +45,17 @@ public class ResultDTO {
     @JsonProperty("image")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String image;
+
+    @JsonProperty("apptk")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String apptk;
+
+    @JsonProperty("newapptk")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String newapptk;
+
+    @JsonProperty("username")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String username;
+
 }
