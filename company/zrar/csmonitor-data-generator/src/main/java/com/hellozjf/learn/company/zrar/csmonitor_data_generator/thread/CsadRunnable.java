@@ -53,13 +53,12 @@ public class CsadRunnable implements Runnable {
                         // 应答或空闲60-300秒
                         int randTime = random.nextInt(300 - 60 + 1) + 60;
                         rand = random.nextInt(3);
+                        changeState(CsadStateEnum.SIGN_IN);
                         if (rand < 1) {
                             // 1/3概率，说明是空闲状态
-                            changeState(CsadStateEnum.IDLE);
                             SleepUtils.sleep(TimeUnit.SECONDS, randTime);
                         } else {
                             // 2/3概率，说明是应答状态
-                            changeState(CsadStateEnum.ANSWER);
                             int totalTime = randTime;
                             int startTime = 0;
                             String sessionId = UUID.randomUUID().toString();
@@ -93,7 +92,7 @@ public class CsadRunnable implements Runnable {
                                 messageinfo.setChannelFrom("WEB");
                                 messageinfo.setChannelTo("WEB");
                                 messageinfo.setContent(RandomStringUtils.randomAlphanumeric(10, 51));
-                                messageinfo.setFromuser("SYSTEM");
+                                messageinfo.setFromuser(csadid);
                                 messageinfo.setMsgtype(getMsgType());
                                 messageinfo.setNumSend(0);
                                 messageinfo.setSessionId(sessionId);

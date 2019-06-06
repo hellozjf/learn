@@ -26,6 +26,9 @@ public class InitServiceImpl implements InitService {
     private MessagetempRepository messagetempRepository;
 
     @Autowired
+    private MessageinfoRepository messageinfoRepository;
+
+    @Autowired
     private ServicelogRepository servicelogRepository;
 
     @Autowired
@@ -47,6 +50,7 @@ public class InitServiceImpl implements InitService {
         initServicelog();
         initCustomservice();
         initCacsiresult();
+        initMessageinfo();
     }
 
     @Override
@@ -76,6 +80,11 @@ public class InitServiceImpl implements InitService {
     @Override
     public void initMessagetemp() {
         messagetempRepository.deleteAll();
+    }
+
+    @Override
+    public void initMessageinfo() {
+        messageinfoRepository.deleteAll();
     }
 
     @Override

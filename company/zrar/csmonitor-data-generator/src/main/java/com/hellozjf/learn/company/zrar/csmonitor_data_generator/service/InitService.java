@@ -7,6 +7,7 @@ public interface InitService {
     void initAll();
     void initCsadState();
     void initMessagetemp();
+    void initMessageinfo();
     void initServicelog();
     void initCustomservice();
     void initCacsiresult();
