@@ -1,26 +1,31 @@
 package com.hellozjf.learn.projects.order12306;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.hellozjf.learn.projects.order12306.dto.NormalPassengerDTO;
+import com.hellozjf.learn.projects.order12306.dto.OrderTicketDTO;
 import com.hellozjf.learn.projects.order12306.dto.ResultDTO;
 import com.hellozjf.learn.projects.order12306.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.*;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.cookie.ClientCookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,9 +36,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -44,6 +50,8 @@ public class Order12306ApplicationTests {
     private CloseableHttpClient httpclient;
     private ObjectMapper objectMapper;
     private Random random;
+    private OrderTicketDTO orderTicketDTO;
+    private Map<String, Integer> mapSeatConf;
 
     @Before
     public void before() {
@@ -51,6 +59,34 @@ public class Order12306ApplicationTests {
         httpclient = getProxyHttpClient(cookieStore);
         objectMapper = new ObjectMapper();
         random = new Random();
+
+        // 初始化OrderTicketDTO
+        orderTicketDTO = new OrderTicketDTO();
+        orderTicketDTO.setTrainDate("2019-06-12");
+        orderTicketDTO.setBackTrainDate(DateUtils.formatDate(new Date(), "yyyy-MM-dd"));
+        orderTicketDTO.setStationTrain("D379");
+        orderTicketDTO.setFromStation("杭州");
+        orderTicketDTO.setToStation("宁波");
+        orderTicketDTO.setSeatType("二等座");
+        orderTicketDTO.setTicketPeople("周靖峰");
+        orderTicketDTO.setUsername("15158037019");
+        orderTicketDTO.setPassword("Zjf@1234");
+        orderTicketDTO.setEmail("908686171@qq.com");
+
+        // 初始化mapSeatConf
+        mapSeatConf = new HashMap<>();
+        mapSeatConf.put("商务座", 32);
+        mapSeatConf.put("一等座", 31);
+        mapSeatConf.put("二等座", 30);
+        mapSeatConf.put("特等座", 25);
+        mapSeatConf.put("高级软卧", 21);
+        mapSeatConf.put("软卧", 23);
+        mapSeatConf.put("动卧", 33);
+        mapSeatConf.put("硬卧", 28);
+        mapSeatConf.put("软座", 24);
+        mapSeatConf.put("硬座", 29);
+        mapSeatConf.put("无座", 26);
+        mapSeatConf.put("其他", 22);
     }
 
     private void otnHttpZFGetJS() throws IOException, URISyntaxException {
@@ -97,7 +133,8 @@ public class Order12306ApplicationTests {
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
         responseString = RegexUtils.getMatch(responseString, ".*\\('(.*)'\\)");
-        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {
+        });
         log.debug("resultDTO = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultDTO));
 
         log.debug("cookies = {}", cookieStore.getCookies());
@@ -172,7 +209,8 @@ public class Order12306ApplicationTests {
         String responseString = getResponse(response);
         log.debug("responseString = {}", responseString);
         String image = RegexUtils.getMatch(responseString, ".*\\((.*)\\)");
-        ResultDTO resultDTO = objectMapper.readValue(image, new TypeReference<ResultDTO>(){});
+        ResultDTO resultDTO = objectMapper.readValue(image, new TypeReference<ResultDTO>() {
+        });
         return resultDTO.getImage();
     }
 
@@ -193,7 +231,8 @@ public class Order12306ApplicationTests {
         CloseableHttpResponse response = httpclient.execute(httppost);
         String responseString = getResponse(response);
         log.debug("responseString = {}", responseString);
-        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {});
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {
+        });
         return resultDTO.getData().asText();
     }
 
@@ -263,7 +302,8 @@ public class Order12306ApplicationTests {
         CloseableHttpResponse response = httpclient.execute(httppost);
         String responseString = getResponse(response);
         log.debug("responseString = {}", responseString);
-        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {
+        });
         return resultDTO.getNewapptk();
     }
 
@@ -302,7 +342,7 @@ public class Order12306ApplicationTests {
         log.debug("responseString = {}", responseString);
     }
 
-    private void otnLeftTicketInit() throws URISyntaxException, IOException {
+    private List<String> otnLeftTicketInit() throws URISyntaxException, IOException {
         URI uri = new URIBuilder()
                 .setScheme("https")
                 .setHost("kyfw.12306.cn")
@@ -313,13 +353,16 @@ public class Order12306ApplicationTests {
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
+        String leftTicketQueryUrl = RegexUtils.getMatch(responseString, "var CLeftTicketUrl = '(.*)';");
+        String stationVersionUrl = RegexUtils.getMatch(responseString, "<script .* src=\"(/otn/resources/js/framework/station_name.js\\?station_version=.*)\" .*</script>");
+        return Arrays.asList(leftTicketQueryUrl, stationVersionUrl);
     }
 
-    private void otnLeftTicketQuery(String trainDate, String fromStation, String toStation) throws URISyntaxException, IOException {
+    private ArrayNode otnLeftTicketQuery(String leftTicketQueryUrl, String trainDate, String fromStation, String toStation) throws URISyntaxException, IOException {
         URI uri = new URIBuilder()
                 .setScheme("https")
                 .setHost("kyfw.12306.cn")
-                .setPath("/otn/leftTicket/query")
+                .setPath("/otn/" + leftTicketQueryUrl)
                 .setParameter("leftTicketDTO.train_date", trainDate)
                 .setParameter("leftTicketDTO.from_station", fromStation)
                 .setParameter("leftTicketDTO.to_station", toStation)
@@ -330,8 +373,9 @@ public class Order12306ApplicationTests {
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
         log.debug("responseString = {}", responseString);
-        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
-        log.debug("result = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultDTO.getData().get("result")));
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {
+        });
+        return (ArrayNode) resultDTO.getData().get("result");
     }
 
     private void otnPasscodeNewGetPassCodeNew() throws URISyntaxException, IOException {
@@ -358,6 +402,30 @@ public class Order12306ApplicationTests {
 //        addCookie(cookieStore, "_jc_save_wfdc_flag", "dc");
     }
 
+    private Map<String, String> otnResourcesJsFrameworkStationName(String stationVersionUrl) throws URISyntaxException, IOException {
+        String[] parts = stationVersionUrl.split("\\?");
+        String[] params = parts[1].split("=");
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath(parts[0])
+                .setParameter(params[0], params[1])
+                .build();
+        HttpGet httpget = new HttpGet(uri);
+
+        CloseableHttpResponse response = httpclient.execute(httpget);
+        String responseString = getResponse(response);
+        String stationNames = RegexUtils.getMatch(responseString, "var station_names ='(.*)';");
+        String[] infos = stationNames.split("@");
+        Map<String, String> nameCodeMap = new HashMap<>();
+        for (int i = 1; i < infos.length; i++) {
+            String info = infos[i];
+            String[] rs = info.split("\\|");
+            nameCodeMap.put(rs[1], rs[2]);
+        }
+        return nameCodeMap;
+    }
+
     private void otnLoginCheckUser() throws URISyntaxException, IOException {
         URI uri = new URIBuilder()
                 .setScheme("https")
@@ -376,6 +444,252 @@ public class Order12306ApplicationTests {
         log.debug("responseString = {}", responseString);
     }
 
+    private String getPassengerTicketStr(JsonNode ticketInfoForPassengerFormNode, NormalPassengerDTO normalPassengerDTO) throws IOException {
+        String seatType = ticketInfoForPassengerFormNode.get("queryLeftNewDetailDTO").get("WZ_seat_type_code").textValue();
+        String ticketType = "1";
+        String cardType = "1";
+        String passengerTicketStr = String.join(",",
+                seatType,
+                "0",
+                ticketType,
+                normalPassengerDTO.getPassengerName(),
+                cardType,
+                normalPassengerDTO.getPassengerIdNo(),
+                normalPassengerDTO.getMobileNo(),
+                "N");
+        return passengerTicketStr;
+    }
+
+    private String getOldPassengerStr(NormalPassengerDTO normalPassengerDTO) {
+        String cardType = "1";
+        String oldPassengerStr = String.join(",",
+                normalPassengerDTO.getPassengerName(),
+                cardType,
+                normalPassengerDTO.getPassengerIdNo(),
+                "1") + "_";
+        return oldPassengerStr;
+    }
+
+    private void otnConfirmPassengerCheckOrderInfo(String repeatSubmitToken, String passengerTicketStr, String oldPassengerStr) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/confirmPassenger/checkOrderInfo")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("cancel_flag", "2"));
+        formparams.add(new BasicNameValuePair("bed_level_order_num", "000000000000000000000000000000"));
+        formparams.add(new BasicNameValuePair("passengerTicketStr", passengerTicketStr));
+        formparams.add(new BasicNameValuePair("oldPassengerStr", oldPassengerStr));
+        formparams.add(new BasicNameValuePair("tour_flag", "dc"));
+        formparams.add(new BasicNameValuePair("randCode", ""));
+        formparams.add(new BasicNameValuePair("whatsSelect", "1"));
+        formparams.add(new BasicNameValuePair("_json_att", ""));
+        formparams.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
+    private void otnLeftTicketSubmitOrderRequest(String secret, OrderTicketDTO orderTicketDTO) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/leftTicket/submitOrderRequest")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("secretStr", secret));
+        formparams.add(new BasicNameValuePair("train_date", orderTicketDTO.getTrainDate()));
+        formparams.add(new BasicNameValuePair("back_train_date", orderTicketDTO.getBackTrainDate()));
+        formparams.add(new BasicNameValuePair("tour_flag", "dc"));
+        formparams.add(new BasicNameValuePair("purpose_codes", "ADULT"));
+        formparams.add(new BasicNameValuePair("query_from_station_name", orderTicketDTO.getFromStation()));
+        formparams.add(new BasicNameValuePair("query_to_station_name", orderTicketDTO.getToStation()));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
+    private List<String> otnConfirmPassengerInitDc() throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/confirmPassenger/initDc")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("_json_att", ""));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+//        log.debug("responseString = {}", responseString);
+        String globalRepeatSubmitToken = RegexUtils.getMatch(responseString, "var globalRepeatSubmitToken = '(.*)';");
+        String ticketInfoForPassengerForm = RegexUtils.getMatch(responseString, "var ticketInfoForPassengerForm=(.*);");
+        ticketInfoForPassengerForm = ticketInfoForPassengerForm.replaceAll("'", "\"");
+        log.debug("globalRepeatSubmitToken = {}", globalRepeatSubmitToken);
+        log.debug("ticketInfoForPassengerForm = {}", ticketInfoForPassengerForm);
+        return Arrays.asList(globalRepeatSubmitToken, ticketInfoForPassengerForm);
+    }
+
+    private void otnConfirmPassengerGetQueueCount(JsonNode ticketInfoForPassengerFormNode, String repeatSubmitToken) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/confirmPassenger/getQueueCount")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        String trainDate = DateUtils.formatDate(new Date(), "EEE MMM dd yyyy") + " 00:00:00 GMT+0800 (中国标准时间)";
+        String trainNo = ticketInfoForPassengerFormNode.get("orderRequestDTO").get("train_no").textValue();
+        String stationTrainCode = ticketInfoForPassengerFormNode.get("orderRequestDTO").get("station_train_code").textValue();
+        String seatType = ticketInfoForPassengerFormNode.get("queryLeftNewDetailDTO").get("WZ_seat_type_code").textValue();
+        String fromStationTelecode = ticketInfoForPassengerFormNode.get("orderRequestDTO").get("from_station_telecode").textValue();
+        String leftTicket = ticketInfoForPassengerFormNode.get("leftTicketStr").textValue();
+        String purposeCodes = ticketInfoForPassengerFormNode.get("purpose_codes").textValue();
+        String trainLocation = ticketInfoForPassengerFormNode.get("train_location").textValue();
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("train_date", trainDate));
+        formparams.add(new BasicNameValuePair("train_no", trainNo));
+        formparams.add(new BasicNameValuePair("stationTrainCode", stationTrainCode));
+        formparams.add(new BasicNameValuePair("seatType", seatType));
+        formparams.add(new BasicNameValuePair("fromStationTelecode", fromStationTelecode));
+        formparams.add(new BasicNameValuePair("leftTicket", leftTicket));
+        formparams.add(new BasicNameValuePair("purpose_codes", purposeCodes));
+        formparams.add(new BasicNameValuePair("train_location", trainLocation));
+        formparams.add(new BasicNameValuePair("_json_att", ""));
+        formparams.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
+    private void otnConfirmPassengerConfirmSingleForQueue(String passengerTicketStr,
+                                                          String oldPassengerStr,
+                                                          JsonNode ticketInfoForPassengerFormNode,
+                                                          String repeatSubmitToken) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/confirmPassenger/confirmSingleForQueue")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("passengerTicketStr", passengerTicketStr));
+        formparams.add(new BasicNameValuePair("oldPassengerStr", oldPassengerStr));
+        formparams.add(new BasicNameValuePair("randCode", ""));
+        formparams.add(new BasicNameValuePair("purpose_codes", ticketInfoForPassengerFormNode.get("purpose_codes").textValue()));
+        formparams.add(new BasicNameValuePair("key_check_isChange", ticketInfoForPassengerFormNode.get("key_check_isChange").textValue()));
+        formparams.add(new BasicNameValuePair("leftTicketStr", ticketInfoForPassengerFormNode.get("leftTicketStr").textValue()));
+        formparams.add(new BasicNameValuePair("train_location", ticketInfoForPassengerFormNode.get("train_location").textValue()));
+        formparams.add(new BasicNameValuePair("choose_seats", ""));
+        formparams.add(new BasicNameValuePair("seatDetailType", ""));
+        formparams.add(new BasicNameValuePair("whatsSelect", "1"));
+        formparams.add(new BasicNameValuePair("roomType", "00"));
+        formparams.add(new BasicNameValuePair("dwAll", "N"));
+        formparams.add(new BasicNameValuePair("_json_att", ""));
+        formparams.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
+    private String otnConfirmPassengerQueryOrderWaitTime(String repeatSubmitToken) throws URISyntaxException, IOException, InterruptedException {
+        while (true) {
+            URI uri = new URIBuilder()
+                    .setScheme("https")
+                    .setHost("kyfw.12306.cn")
+                    .setPath("/otn/confirmPassenger/queryOrderWaitTime")
+                    .setParameter("random", String.valueOf(System.currentTimeMillis()))
+                    .setParameter("tourFlag", "dc")
+                    .setParameter("json_att", "")
+                    .setParameter("REPEAT_SUBMIT_TOKEN", repeatSubmitToken)
+                    .build();
+            HttpGet httpget = new HttpGet(uri);
+
+            CloseableHttpResponse response = httpclient.execute(httpget);
+            String responseString = getResponse(response);
+//            log.debug("responseString = {}", responseString);
+            ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+            log.debug("resultDTO = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultDTO));
+
+            JsonNode orderIdNode = resultDTO.getData().get("orderId");
+            if (orderIdNode.isNull()) {
+                TimeUnit.SECONDS.sleep(1);
+            } else {
+                return orderIdNode.asText();
+            }
+        }
+    }
+
+    private void otnConfirmPassengerResultOrderForDcQueue() throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/confirmPassenger/resultOrderForDcQueue")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+    }
+
+    private NormalPassengerDTO otnConfirmPassengerGetPassengerDTOs(String repeatSubmitToken, OrderTicketDTO orderTicketDTO) throws URISyntaxException, IOException {
+        URI uri = new URIBuilder()
+                .setScheme("https")
+                .setHost("kyfw.12306.cn")
+                .setPath("/otn/confirmPassenger/getPassengerDTOs")
+                .build();
+        HttpPost httppost = new HttpPost(uri);
+
+        List<NameValuePair> formparams = new ArrayList<>();
+        formparams.add(new BasicNameValuePair("_json_att", ""));
+        formparams.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", repeatSubmitToken));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+        httppost.setEntity(entity);
+
+        CloseableHttpResponse response = httpclient.execute(httppost);
+        String responseString = getResponse(response);
+        log.debug("responseString = {}", responseString);
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        JsonNode normalPassengers = resultDTO.getData().get("normal_passengers");
+        String normalPassengersString = objectMapper.writeValueAsString(normalPassengers);
+        log.debug("normalPassengers = {}", normalPassengersString);
+        List<NormalPassengerDTO> normalPassengerList = objectMapper.readValue(normalPassengersString, new TypeReference<List<NormalPassengerDTO>>(){});
+//        log.debug("normalPassengerList = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(normalPassengerList));
+        for (NormalPassengerDTO normalPassengerDTO : normalPassengerList) {
+            if (normalPassengerDTO.getPassengerName().equalsIgnoreCase(orderTicketDTO.getTicketPeople())) {
+                return normalPassengerDTO;
+            }
+        }
+        return null;
+    }
+
     private String getResponse(CloseableHttpResponse response) throws IOException {
         try {
             HttpEntity httpEntity = response.getEntity();
@@ -390,6 +704,27 @@ public class Order12306ApplicationTests {
         return null;
     }
 
+    private String getWantedTicketSecret(OrderTicketDTO orderTicketDTO, ArrayNode arrayNode) throws IOException {
+
+        for (JsonNode jsonNode : arrayNode) {
+            String r = jsonNode.textValue();
+            String[] rs = r.split("\\|");
+            if (rs[3].equalsIgnoreCase(orderTicketDTO.getStationTrain())) {
+                int seatType = mapSeatConf.get(orderTicketDTO.getSeatType());
+                log.debug("列车: {}, 余票: {}", orderTicketDTO.getStationTrain(), rs[seatType]);
+                if (!rs[seatType].equalsIgnoreCase("无") &&
+                        !rs[seatType].equalsIgnoreCase("") &&
+                        !rs[seatType].equalsIgnoreCase("*")) {
+                    // 查询到符合条件的票存入cookie
+                    String secret = URLDecoder.decode(rs[0], StandardCharsets.UTF_8);
+                    log.debug("secret = {}", secret);
+                    return secret;
+                }
+            }
+        }
+        return null;
+    }
+
     private void login() throws IOException, URISyntaxException {
         otnHttpZFGetJS();
         otnHttpZFLogdevice();
@@ -400,7 +735,7 @@ public class Order12306ApplicationTests {
         String image = passportCaptchaCaptchaImage64();
         String check = getCheck(image);
         passportCaptchaCaptchaCheck(check);
-        passportWebLogin("15158037019", "Zjf@1234", check);
+        passportWebLogin(orderTicketDTO.getUsername(), orderTicketDTO.getPassword(), check);
         otnLoginUserLogin();
         String newapptk = passportWebAuthUamtk();
         otnUamauthclient(newapptk);
@@ -410,12 +745,37 @@ public class Order12306ApplicationTests {
     }
 
     @Test
-    public void order() throws IOException, URISyntaxException {
+    public void order() throws IOException, URISyntaxException, InterruptedException {
         login();
-        otnLeftTicketInit();
+        List<String> otnLeftTicketInitResult = otnLeftTicketInit();
+        String leftTicketQueryUrl = otnLeftTicketInitResult.get(0);
+        String stationVersionUrl = otnLeftTicketInitResult.get(1);
+        log.debug("leftTicketQueryUrl = {}", leftTicketQueryUrl);
+        log.debug("stationVersionUrl = {}", stationVersionUrl);
+        Map<String, String> nameCodeMap = otnResourcesJsFrameworkStationName(stationVersionUrl);
+        log.debug("nameCodeMap = {}", nameCodeMap);
         otnPasscodeNewGetPassCodeNew();
-        otnLeftTicketQuery("2019-06-12", "HZH", "NGH");
+        String trainDate = orderTicketDTO.getTrainDate();
+        String fromStationCode = nameCodeMap.get(orderTicketDTO.getFromStation());
+        String toStationCode = nameCodeMap.get(orderTicketDTO.getToStation());
+        ArrayNode arrayNode = otnLeftTicketQuery(leftTicketQueryUrl, trainDate, fromStationCode, toStationCode);
+        String secret = getWantedTicketSecret(orderTicketDTO, arrayNode);
         otnLoginCheckUser();
+        otnLeftTicketSubmitOrderRequest(secret, orderTicketDTO);
+        List<String> otnConfirmPassengerInitDcResult = otnConfirmPassengerInitDc();
+        String globalRepeatSubmitToken = otnConfirmPassengerInitDcResult.get(0);
+        String ticketInfoForPassengerForm = otnConfirmPassengerInitDcResult.get(1);
+        JsonNode ticketInfoForPassengerFormNode = objectMapper.readTree(ticketInfoForPassengerForm);
+        NormalPassengerDTO normalPassengerDTO = otnConfirmPassengerGetPassengerDTOs(globalRepeatSubmitToken, orderTicketDTO);
+        otnPasscodeNewGetPassCodeNew();
+
+        String passengerTicketStr = getPassengerTicketStr(ticketInfoForPassengerFormNode, normalPassengerDTO);
+        String oldPassengerStr = getOldPassengerStr(normalPassengerDTO);
+        otnConfirmPassengerCheckOrderInfo(globalRepeatSubmitToken, passengerTicketStr, oldPassengerStr);
+        otnConfirmPassengerGetQueueCount(ticketInfoForPassengerFormNode, globalRepeatSubmitToken);
+        otnConfirmPassengerConfirmSingleForQueue(passengerTicketStr, oldPassengerStr, ticketInfoForPassengerFormNode, globalRepeatSubmitToken);
+        String orderId = otnConfirmPassengerQueryOrderWaitTime(globalRepeatSubmitToken);
+        otnConfirmPassengerResultOrderForDcQueue();
     }
 
     private CloseableHttpClient getProxyHttpClient(CookieStore cookieStore) {

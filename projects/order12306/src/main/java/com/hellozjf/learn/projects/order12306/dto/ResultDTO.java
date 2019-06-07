@@ -3,10 +3,7 @@ package com.hellozjf.learn.projects.order12306.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @author Jingfeng Zhou
@@ -76,6 +73,10 @@ public class ResultDTO {
 
     @JsonProperty("messages")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String messages;
+    private JsonNode messages;
+
+    @JsonProperty("validateMessages")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private JsonNode validateMessages;
 
 }

@@ -13,7 +13,7 @@
     <artifactId>order12306</artifactId>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
     </properties>
 
     <dependencies>
@@ -29,7 +29,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
