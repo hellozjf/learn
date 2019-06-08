@@ -10,10 +10,7 @@ import com.hellozjf.learn.projects.order12306.dto.ResultDTO;
 import com.hellozjf.learn.projects.order12306.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,6 +18,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -37,6 +35,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -96,6 +95,8 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/HttpZF/GetJS")
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
+
         CloseableHttpResponse response = httpclient.execute(httpget);
         getResponse(response);
     }
@@ -130,6 +131,8 @@ public class Order12306ApplicationTests {
                 .setParameter("timestamp", String.valueOf(System.currentTimeMillis()))
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
+
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
         responseString = RegexUtils.getMatch(responseString, ".*\\('(.*)'\\)");
@@ -150,6 +153,7 @@ public class Order12306ApplicationTests {
                 .setPath("/passport/web/auth/uamtk-static")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("appid", "otn"));
@@ -168,6 +172,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/login/conf")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
@@ -185,6 +190,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/index12306/getLoginBanner")
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -204,6 +210,7 @@ public class Order12306ApplicationTests {
                 .setParameter("_", String.valueOf(System.currentTimeMillis()))
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -222,6 +229,7 @@ public class Order12306ApplicationTests {
                 .setPath("/result/base64")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("base64String", image));
@@ -248,6 +256,8 @@ public class Order12306ApplicationTests {
                 .setParameter("_", String.valueOf(System.currentTimeMillis()))
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
+
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
         log.debug("responseString = {}", responseString);
@@ -260,6 +270,7 @@ public class Order12306ApplicationTests {
                 .setPath("/passport/web/login")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("username", username));
@@ -281,6 +292,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/login/userLogin")
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         getResponse(response);
@@ -293,6 +305,7 @@ public class Order12306ApplicationTests {
                 .setPath("/passport/web/auth/uamtk")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("appid", "otn"));
@@ -314,6 +327,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/uamauthclient")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("tk", newapptk));
@@ -332,6 +346,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/index/initMy12306Api")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
@@ -350,6 +365,7 @@ public class Order12306ApplicationTests {
                 .setParameter("linktypeid", "dc")
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -369,6 +385,7 @@ public class Order12306ApplicationTests {
                 .setParameter("purpose_codes", "ADULT")
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -388,6 +405,7 @@ public class Order12306ApplicationTests {
                 .setParameter(String.valueOf(random.nextDouble()), null)
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -412,6 +430,7 @@ public class Order12306ApplicationTests {
                 .setParameter(params[0], params[1])
                 .build();
         HttpGet httpget = new HttpGet(uri);
+        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -433,6 +452,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/login/checkUser")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("_json_att", ""));
@@ -477,6 +497,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/checkOrderInfo")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("cancel_flag", "2"));
@@ -503,6 +524,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/leftTicket/submitOrderRequest")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("secretStr", secret));
@@ -527,6 +549,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/initDc")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("_json_att", ""));
@@ -551,12 +574,14 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/getQueueCount")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         String trainDate = DateUtils.formatDate(new Date(), "EEE MMM dd yyyy") + " 00:00:00 GMT+0800 (中国标准时间)";
         String trainNo = ticketInfoForPassengerFormNode.get("orderRequestDTO").get("train_no").textValue();
         String stationTrainCode = ticketInfoForPassengerFormNode.get("orderRequestDTO").get("station_train_code").textValue();
         String seatType = ticketInfoForPassengerFormNode.get("queryLeftNewDetailDTO").get("WZ_seat_type_code").textValue();
         String fromStationTelecode = ticketInfoForPassengerFormNode.get("orderRequestDTO").get("from_station_telecode").textValue();
+        String toStationTelecode = ticketInfoForPassengerFormNode.get("orderRequestDTO").get("to_station_telecode").textValue();
         String leftTicket = ticketInfoForPassengerFormNode.get("leftTicketStr").textValue();
         String purposeCodes = ticketInfoForPassengerFormNode.get("purpose_codes").textValue();
         String trainLocation = ticketInfoForPassengerFormNode.get("train_location").textValue();
@@ -567,6 +592,7 @@ public class Order12306ApplicationTests {
         formparams.add(new BasicNameValuePair("stationTrainCode", stationTrainCode));
         formparams.add(new BasicNameValuePair("seatType", seatType));
         formparams.add(new BasicNameValuePair("fromStationTelecode", fromStationTelecode));
+        formparams.add(new BasicNameValuePair("toStationTelecode", toStationTelecode));
         formparams.add(new BasicNameValuePair("leftTicket", leftTicket));
         formparams.add(new BasicNameValuePair("purpose_codes", purposeCodes));
         formparams.add(new BasicNameValuePair("train_location", trainLocation));
@@ -590,6 +616,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/confirmSingleForQueue")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("passengerTicketStr", passengerTicketStr));
@@ -599,8 +626,8 @@ public class Order12306ApplicationTests {
         formparams.add(new BasicNameValuePair("key_check_isChange", ticketInfoForPassengerFormNode.get("key_check_isChange").textValue()));
         formparams.add(new BasicNameValuePair("leftTicketStr", ticketInfoForPassengerFormNode.get("leftTicketStr").textValue()));
         formparams.add(new BasicNameValuePair("train_location", ticketInfoForPassengerFormNode.get("train_location").textValue()));
-        formparams.add(new BasicNameValuePair("choose_seats", ""));
-        formparams.add(new BasicNameValuePair("seatDetailType", ""));
+        formparams.add(new BasicNameValuePair("choose_seats", "1F"));
+        formparams.add(new BasicNameValuePair("seatDetailType", "000"));
         formparams.add(new BasicNameValuePair("whatsSelect", "1"));
         formparams.add(new BasicNameValuePair("roomType", "00"));
         formparams.add(new BasicNameValuePair("dwAll", "N"));
@@ -626,16 +653,23 @@ public class Order12306ApplicationTests {
                     .setParameter("REPEAT_SUBMIT_TOKEN", repeatSubmitToken)
                     .build();
             HttpGet httpget = new HttpGet(uri);
+            httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
             CloseableHttpResponse response = httpclient.execute(httpget);
             String responseString = getResponse(response);
 //            log.debug("responseString = {}", responseString);
-            ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+            ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {
+            });
             log.debug("resultDTO = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultDTO));
 
             JsonNode orderIdNode = resultDTO.getData().get("orderId");
             if (orderIdNode.isNull()) {
-                TimeUnit.SECONDS.sleep(1);
+                int waitTime = resultDTO.getData().get("waitTime").intValue();
+                if (waitTime > 0) {
+                    TimeUnit.SECONDS.sleep(waitTime);
+                } else {
+                    log.error("waitTime = {}", waitTime);
+                }
             } else {
                 return orderIdNode.asText();
             }
@@ -649,6 +683,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/resultOrderForDcQueue")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
@@ -666,6 +701,7 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/getPassengerDTOs")
                 .build();
         HttpPost httppost = new HttpPost(uri);
+        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("_json_att", ""));
@@ -676,11 +712,13 @@ public class Order12306ApplicationTests {
         CloseableHttpResponse response = httpclient.execute(httppost);
         String responseString = getResponse(response);
         log.debug("responseString = {}", responseString);
-        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {
+        });
         JsonNode normalPassengers = resultDTO.getData().get("normal_passengers");
         String normalPassengersString = objectMapper.writeValueAsString(normalPassengers);
         log.debug("normalPassengers = {}", normalPassengersString);
-        List<NormalPassengerDTO> normalPassengerList = objectMapper.readValue(normalPassengersString, new TypeReference<List<NormalPassengerDTO>>(){});
+        List<NormalPassengerDTO> normalPassengerList = objectMapper.readValue(normalPassengersString, new TypeReference<List<NormalPassengerDTO>>() {
+        });
 //        log.debug("normalPassengerList = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(normalPassengerList));
         for (NormalPassengerDTO normalPassengerDTO : normalPassengerList) {
             if (normalPassengerDTO.getPassengerName().equalsIgnoreCase(orderTicketDTO.getTicketPeople())) {
@@ -758,6 +796,9 @@ public class Order12306ApplicationTests {
         String trainDate = orderTicketDTO.getTrainDate();
         String fromStationCode = nameCodeMap.get(orderTicketDTO.getFromStation());
         String toStationCode = nameCodeMap.get(orderTicketDTO.getToStation());
+
+        // 这里好像需要增加一个cookie
+        addJcSaveCookie(cookieStore, orderTicketDTO, nameCodeMap);
         ArrayNode arrayNode = otnLeftTicketQuery(leftTicketQueryUrl, trainDate, fromStationCode, toStationCode);
         String secret = getWantedTicketSecret(orderTicketDTO, arrayNode);
         otnLoginCheckUser();
@@ -776,6 +817,25 @@ public class Order12306ApplicationTests {
         otnConfirmPassengerConfirmSingleForQueue(passengerTicketStr, oldPassengerStr, ticketInfoForPassengerFormNode, globalRepeatSubmitToken);
         String orderId = otnConfirmPassengerQueryOrderWaitTime(globalRepeatSubmitToken);
         otnConfirmPassengerResultOrderForDcQueue();
+    }
+
+    public static String string2Unicode(String string) {
+        StringBuilder unicode = new StringBuilder();
+        for (int i = 0; i < string.length(); i++) {
+            // 取出每一个字符
+            char c = string.charAt(i);
+            // 转换为unicode
+            unicode.append("%u" + Integer.toHexString(c));
+        }
+        return unicode.toString();
+    }
+
+    private void addJcSaveCookie(CookieStore cookieStore, OrderTicketDTO orderTicketDTO, Map<String, String> nameCodeMap) {
+        addCookie(cookieStore, "_jc_save_fromStation", string2Unicode(orderTicketDTO.getFromStation()) + "%2C" + nameCodeMap.get(orderTicketDTO.getFromStation()));
+        addCookie(cookieStore, "_jc_save_toStation", string2Unicode(orderTicketDTO.getToStation()) + "%2C" + nameCodeMap.get(orderTicketDTO.getToStation()));
+        addCookie(cookieStore, "_jc_save_fromDate", orderTicketDTO.getTrainDate());
+        addCookie(cookieStore, "_jc_save_toDate", orderTicketDTO.getBackTrainDate());
+        addCookie(cookieStore, "_jc_save_wfdc_flag", "dc");
     }
 
     private CloseableHttpClient getProxyHttpClient(CookieStore cookieStore) {
