@@ -7336,7 +7336,7 @@ var isInitLoad = true;
 			cw.attachViewportTo("winVP");
 			cw.setImagePath(ctx + "resources/js/rich/windows/imgs/")
 		}
-		$("#username").keydown(function() {
+		$("#userName").keydown(function() {
 			login_errorMsg_hide()
 		});
 		$("#password").keydown(function() {
@@ -7402,7 +7402,7 @@ var isInitLoad = true;
 	}
 	function bA() {
 		a6();
-		$("#username").val("");
+		$("#userName").val("");
 		$("#password").val("");
 		$("#randCode").val("");
 		cq()
@@ -7419,7 +7419,7 @@ var isInitLoad = true;
 		}
 	}
 	function a6() {
-		$("#username").add($("#password")).add($("#randCode")).add($("#randCode2")).removeClass("error")
+		$("#userName").add($("#password")).add($("#randCode")).add($("#randCode2")).removeClass("error")
 	}
 	function F(cP) {
 		var cM = /^(13[0-9])|(14[0-9])|(15[0-9])|(18[0-9])|(17[0-9])|(19[0-9])|(16[0-9])\d{8}$/;
@@ -7428,11 +7428,11 @@ var isInitLoad = true;
 		var cN = true;
 		a6();
 		if ("" == cP || cP == null || cP == uninputmsg || cP == "admin") {
-			$("#username").removeClass("inptxt w200").addClass("inptxt w200 error");
+			$("#userName").removeClass("inptxt w200").addClass("inptxt w200 error");
 			cN = login_messages.userNameEmpty
 		} else {
 			if (!cL.test(cP) && !cO.test(cP) && !cM.test(cP)) {
-				$("#username").removeClass("inptxt w200").addClass("inptxt w200 error");
+				$("#userName").removeClass("inptxt w200").addClass("inptxt w200 error");
 				cN = login_messages.userNameFormat
 			}
 		}
@@ -7453,7 +7453,7 @@ var isInitLoad = true;
 		return cM
 	}
 	function ba() {
-		var cN = $.trim($("#username").val());
+		var cN = $.trim($("#userName").val());
 		var cL = $.trim($("#password").val());
 		var cM = F(cN);
 		return typeof(cM) === "boolean" ? bS(cL) : cM
@@ -7461,11 +7461,11 @@ var isInitLoad = true;
 	function E() {
 		var cM = false;
 		var cL = false;
-		$("#username").on("keyup", function() {
+		$("#userName").on("keyup", function() {
 			aO = true
 		}).blur(function() {
 			if (aO) {
-				var cN = $.trim($("#username").val());
+				var cN = $.trim($("#userName").val());
 				cM = F(cN);
 				if (if_show_pass_code_login == "Y") {
 					if (typeof(cM) !== "boolean") {
@@ -7515,12 +7515,12 @@ var isInitLoad = true;
 		if (cL != null) {
 			if (cL == "登录名不存在。") {
 				aO = false;
-				$("#username").add($("#password")).add($("#randCode")).add($("#randCode2")).removeClass("error");
-				$("#username").removeClass("inptxt w200").addClass("inptxt w200 error");
-				$("#username").focus()
+				$("#userName").add($("#password")).add($("#randCode")).add($("#randCode2")).removeClass("error");
+				$("#userName").removeClass("inptxt w200").addClass("inptxt w200 error");
+				$("#userName").focus()
 			} else {
 				if (cL.indexOf("密码输入错误。") != -1) {
-					$("#username").add($("#password")).add($("#randCode")).add($("#randCode2")).removeClass("error");
+					$("#userName").add($("#password")).add($("#randCode")).add($("#randCode2")).removeClass("error");
 					$("#password").removeClass("inptxt w200").addClass("inptxt w200 error");
 					$("#password").focus()
 				}
@@ -7547,7 +7547,7 @@ var isInitLoad = true;
 				$.ajax({
 					url: passport_login,
 					data: {
-						username: $("#username").val(),
+						username: $("#userName").val(),
 						password: $("#password").val(),
 						appid: passport_appId
 					},
@@ -7692,7 +7692,7 @@ var isInitLoad = true;
 					$("#loginForm").ajaxSubmit({
 						url: passport_login,
 						data: {
-							username: $("#username").val(),
+							username: $("#userName").val(),
 							password: $("#password").val(),
 							appid: passport_appId
 						},
@@ -7842,26 +7842,26 @@ var isInitLoad = true;
 		}
 	}
 	function cq() {
-		$("#username").css("color", "#333");
+		$("#userName").css("color", "#333");
 		$("#password").css("color", "#333");
 		$("#randCode").css("color", "#333");
-		if ($("#username").val() == "" || $("#username").val() == uninputmsg || $("#username").val() == null || $("#username").val() == "admin") {
-			$("#username").css("color", "#999");
-			$("#username").val(uninputmsg);
+		if ($("#userName").val() == "" || $("#userName").val() == uninputmsg || $("#userName").val() == null || $("#userName").val() == "admin") {
+			$("#userName").css("color", "#999");
+			$("#userName").val(uninputmsg);
 			$("#password").val("")
 		}
-		$("#username").focus(function() {
-			var cL = $("#username").val();
+		$("#userName").focus(function() {
+			var cL = $("#userName").val();
 			if (cL == uninputmsg) {
-				$("#username").css("color", "#333");
-				$("#username").val("");
+				$("#userName").css("color", "#333");
+				$("#userName").val("");
 				$("#password").val("")
 			}
 		}).blur(function() {
-			var cL = $("#username").val();
+			var cL = $("#userName").val();
 			if (cL == "") {
-				$("#username").css("color", "#999");
-				$("#username").val(uninputmsg)
+				$("#userName").css("color", "#999");
+				$("#userName").val(uninputmsg)
 			}
 		})
 	}
@@ -8515,7 +8515,7 @@ jQuery.validator.addMethod("checkLoginUserName", function(f, d) {
 		a = true
 	}
 	return this.optional(d) || a
-}, "wrong username.");
+}, "wrong userName.");
 jQuery.validator.addMethod("requiredUserName", function(b, a) {
 	if ("用户名／邮箱／手机号" == b) {
 		return false
@@ -8524,7 +8524,7 @@ jQuery.validator.addMethod("requiredUserName", function(b, a) {
 		return false
 	}
 	return true
-}, "wrong username.");
+}, "wrong userName.");
 jQuery.validator.addMethod("requiredSchoolName", function(b, a) {
 	if ("简码／汉字" == b) {
 		return false
@@ -8961,7 +8961,7 @@ function rtrim(a) {
 }
 jQuery.validator.addMethod("validateName", function(b, a) {
 	return this.optional(a) || /^[a-zA-Z\u3400-\u9FFF0-9\_]+$/.test(b)
-}, "wrong username.");
+}, "wrong userName.");
 jQuery.validator.addMethod("studentRequired", function(b, a, c) {
 	if ($(c).val() == "3") {
 		return b && trim(b) != ""
@@ -8979,7 +8979,7 @@ jQuery.validator.addMethod("studentValidateName", function(b, a, c) {
 		return this.optional(a) || /^[a-zA-Z\u3400-\u9FFF0-9\_]+$/.test(b)
 	}
 	return true
-}, "wrong username.");
+}, "wrong userName.");
 jQuery.validator.addMethod("checkStudentName", function(b, a, c) {
 	if ($(c).val() == "3") {
 		if ((!b || trim(b) == "" || trim(b) == "简码/汉字")) {
@@ -8987,7 +8987,7 @@ jQuery.validator.addMethod("checkStudentName", function(b, a, c) {
 		}
 	}
 	return true
-}, "wrong username.");
+}, "wrong userName.");
 jQuery.validator.addMethod("isQuestionNull", function(b, a, c) {
 	if (jQuery.trim(b) != "") {
 		if (jQuery.trim($(c[0]).val()) == "customQuestion" && jQuery.trim($(c[1]).val()) == "" || jQuery.trim($(c[0]).val()) == "") {
@@ -9120,7 +9120,7 @@ jQuery.validator.addMethod("checkStation", function(b, a) {
 		return false
 	}
 	return true
-}, "wrong username.");
+}, "wrong userName.");
 jQuery.validator.addMethod("checkAnsyUserName", function(e, c, f) {
 	var b = f[0];
 	var d = $("#" + f[1]).val();

@@ -1,4 +1,4 @@
-package com.hellozjf.test.testftp;
+package com.hellozjf.learn.projects.testftp;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTP;
@@ -11,9 +11,7 @@ import org.springframework.stereotype.Component;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalField;
 import java.util.UUID;
 
 /**

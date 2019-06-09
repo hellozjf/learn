@@ -1,4 +1,4 @@
-package com.hellozjf.test.testftp;
+package com.hellozjf.learn.projects.testftp;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

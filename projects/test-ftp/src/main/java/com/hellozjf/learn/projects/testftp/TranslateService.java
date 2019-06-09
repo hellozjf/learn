@@ -1,4 +1,4 @@
-package com.hellozjf.test.testftp;
+package com.hellozjf.learn.projects.testftp;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

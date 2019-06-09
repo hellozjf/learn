@@ -55,7 +55,7 @@ public class ResultDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String newapptk;
 
-    @JsonProperty("username")
+    @JsonProperty("userName")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String username;
 

@@ -15,6 +15,7 @@
     <modules>
         <module>order12306</module>
         <module>test-ftp</module>
+        <module>mock-backend</module>
     </modules>
 
 
