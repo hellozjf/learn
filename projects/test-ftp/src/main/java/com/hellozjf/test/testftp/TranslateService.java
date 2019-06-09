@@ -74,7 +74,8 @@ public class TranslateService {
                     log.debug("body = {}", body);
                     node = objectMapper.readTree(body);
                     log.debug("node = {}", node);
-                    if (node.get("error_code").asText().equalsIgnoreCase("52001")) {
+                    if (node.has("error_code") &&
+                            node.get("error_code").asText().equalsIgnoreCase("52001")) {
                         log.debug("try again");
                         continue;
                     }
