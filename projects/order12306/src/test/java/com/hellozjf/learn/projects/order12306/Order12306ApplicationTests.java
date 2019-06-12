@@ -61,13 +61,14 @@ public class Order12306ApplicationTests {
     @Before
     public void before() {
         cookieStore = cookieStore();
-        httpclient = getProxyHttpClient(cookieStore);
+        httpclient = getHttpClient(cookieStore);
+//        httpclient = getProxyHttpClient(cookieStore);
         objectMapper = new ObjectMapper();
         random = new Random();
 
         // 初始化OrderTicketDTO
         orderTicketDTO = new OrderTicketDTO();
-        orderTicketDTO.setTrainDate("2019-06-15");
+        orderTicketDTO.setTrainDate("2019-06-18");
         orderTicketDTO.setBackTrainDate(DateUtils.formatDate(new Date(), "yyyy-MM-dd"));
         orderTicketDTO.setStationTrain("D379");
         orderTicketDTO.setFromStation("杭州");
