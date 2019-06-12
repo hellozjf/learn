@@ -856,7 +856,7 @@ public class Order12306ApplicationTests {
         String secret = queryTicket(leftTicketQueryUrl, nameCodeMap);
 
         // 这里好像需要增加一个cookie
-        addJcSaveCookie(cookieStore, orderTicketDTO, nameCodeMap);
+//        addJcSaveCookie(cookieStore, orderTicketDTO, nameCodeMap);
 
         otnLoginCheckUser();
         otnLeftTicketSubmitOrderRequest(secret, orderTicketDTO);
