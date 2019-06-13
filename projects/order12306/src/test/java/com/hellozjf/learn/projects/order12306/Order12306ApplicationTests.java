@@ -68,7 +68,7 @@ public class Order12306ApplicationTests {
 
         // 初始化OrderTicketDTO
         orderTicketDTO = new OrderTicketDTO();
-        orderTicketDTO.setTrainDate("2019-06-18");
+        orderTicketDTO.setTrainDate("2019-06-20");
         orderTicketDTO.setBackTrainDate(DateUtils.formatDate(new Date(), "yyyy-MM-dd"));
         orderTicketDTO.setStationTrain("D379");
         orderTicketDTO.setFromStation("杭州");
