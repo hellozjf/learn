@@ -1,5 +1,6 @@
 package com.hellozjf.learn.projects.mockbackend.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -23,5 +24,6 @@ public class ResultVO<T> {
     /**
      * 具体的内容.
      */
+    @JsonProperty("result")
     private T data;
 }

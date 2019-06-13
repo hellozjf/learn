@@ -9,11 +9,11 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  */
 @SpringBootApplication
 @Slf4j
-public class SpringbootApplication {
+public class MockBackendApplication {
 
     public static void main(String[] args) {
         // springboot默认不开启图形界面，通过设置headless(false)开启图形界面
-        new SpringApplicationBuilder(SpringbootApplication.class)
+        new SpringApplicationBuilder(MockBackendApplication.class)
                 .headless(false)
                 .run(args);
     }

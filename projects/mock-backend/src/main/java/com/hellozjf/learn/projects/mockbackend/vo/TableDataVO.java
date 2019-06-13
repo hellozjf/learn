@@ -9,6 +9,7 @@ import lombok.Data;
 public class TableDataVO {
     private Integer id;
     private String userName;
+    private Integer age;
     private Integer sex;
     private Integer state;
     private Integer interest;
