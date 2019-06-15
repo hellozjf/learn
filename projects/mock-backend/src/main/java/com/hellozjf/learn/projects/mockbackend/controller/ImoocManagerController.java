@@ -64,7 +64,7 @@ public class ImoocManagerController {
             tableDataVO.setAge(random.nextInt(40 - 10 + 1) + 10);
             tableDataVO.setSex(person.getSex());
             tableDataVO.setState(RandomValueUtils.getNum(1, 5));
-            tableDataVO.setInterest(RandomValueUtils.getNum(1, 8));
+            tableDataVO.setInterest(RandomValueUtils.getNum(1, 5));
             tableDataVO.setIsMarried(RandomValueUtils.getNum(0, 1));
             tableDataVO.setBirthday("2000-01-01");
             tableDataVO.setAddress("北京市海淀区");

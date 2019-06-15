@@ -61,8 +61,8 @@ public class Order12306ApplicationTests {
     @Before
     public void before() {
         cookieStore = cookieStore();
-        httpclient = getHttpClient(cookieStore);
-//        httpclient = getProxyHttpClient(cookieStore);
+//        httpclient = getHttpClient(cookieStore);
+        httpclient = getProxyHttpClient(cookieStore);
         objectMapper = new ObjectMapper();
         random = new Random();
 
