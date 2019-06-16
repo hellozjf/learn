@@ -33,3 +33,5 @@ HELP.md
 /company/zrar/csmonitor-data-generator/logs/
 /logs/
 /projects/order12306/target/
+/projects/score-system-frontend/node_modules/
+/projects/score-system-frontend/yarn.lock
