@@ -31,13 +31,16 @@ export default class Axios {
   }
 
   static requestEntityList(_this, url, params) {
+    // ant-design的分页从1开始，jpa-rest的分页从0开始，所以传入的时候要-1，接收的时候要+1
+    if (params.page) {
+      params.page = params.page - 1;
+    }
+    // jpa-rest的排序字段需要手动拼接
+    if (params.field && params.order) {
+      params.sort = params.field + ',' + params.order
+    }
     let data = {
-      // ant-design的分页从1开始，jpa-rest的分页从0开始，所以传入的时候要-1，接收的时候要+1
-      params: {
-        page: params.page - 1,
-        size: params.size,
-        sort: params.field + ',' + params.order
-      }
+      params
     };
     this.ajaxEntity({
       url,

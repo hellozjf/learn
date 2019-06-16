@@ -10,9 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @author hellozjf
@@ -35,5 +36,16 @@ public class ClassController {
         return ResultUtils.success(page);
     }
 
+    /**
+     * 获取名称类似于
+     * @param name
+     * @return
+     */
+    @GetMapping("/findByNameLike")
+    public ResultVO findByNameLike(String name,
+                                   @PageableDefault(value = 10, sort = { "modifiedDateTime" }, direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<ClassEntity> classEntityPage = classRepository.findByNameLike("%" + name + "%", pageable);
+        return ResultUtils.success(classEntityPage);
+    }
 
 }

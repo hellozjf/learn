@@ -55,8 +55,13 @@ export default class User extends React.Component {
   }
 
   handleFilter = (params) => {
-    this.params = params;
-    this.requestList();
+    console.debug(`params=${JSON.stringify(params)}`);
+    params.name = '%' + params.name + '%';
+    params.page = this.params.page;
+    params.size = this.params.size;
+    params.field = this.params.field;
+    params.order = this.params.order;
+    axios.requestEntityList(this, '/class/search/findByNameLike', params);
   };
 
   requestList = () => {
