@@ -12,10 +12,11 @@ const Option = Select.Option;
 export default class User extends React.Component {
 
   params = {
+    url: '/class',
     page: 1,
     size: 10,
     field: 'gmtCreate',
-    order: 'asc',
+    order: 'asc'
   }
 
   state = {
@@ -56,16 +57,17 @@ export default class User extends React.Component {
 
   handleFilter = (params) => {
     console.debug(`params=${JSON.stringify(params)}`);
-    params.name = '%' + params.name + '%';
-    params.page = this.params.page;
-    params.size = this.params.size;
-    params.field = this.params.field;
-    params.order = this.params.order;
-    axios.requestEntityList(this, '/class/search/findByNameLike', params);
+    if (params.name && params.name != "") {
+      this.params.url = '/class/search/findByNameLike';
+    } else {
+      this.params.url = '/class';
+    }
+    this.params.name = '%' + params.name + '%';
+    this.requestList();
   };
 
   requestList = () => {
-    axios.requestEntityList(this, '/class', this.params);
+    axios.requestEntityList(this, this.params);
   };
 
   // 功能区操作

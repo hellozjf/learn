@@ -30,7 +30,7 @@ export default class Axios {
     });
   }
 
-  static requestEntityList(_this, url, params) {
+  static requestEntityList(_this, params) {
     // ant-design的分页从1开始，jpa-rest的分页从0开始，所以传入的时候要-1，接收的时候要+1
     if (params.page) {
       params.page = params.page - 1;
@@ -39,6 +39,7 @@ export default class Axios {
     if (params.field && params.order) {
       params.sort = params.field + ',' + params.order
     }
+    let url = params.url;
     let data = {
       params
     };
