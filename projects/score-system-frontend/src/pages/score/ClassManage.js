@@ -17,11 +17,11 @@ export default class User extends React.Component {
     size: 10,
     field: 'gmtCreate',
     order: 'asc'
-  }
+  };
 
   state = {
     isVisible: false
-  }
+  };
 
   formList = [
     {
@@ -30,26 +30,15 @@ export default class User extends React.Component {
       field: 'name',
       placeholder: '请输入班级名称',
       width: 140
+    },
+    {
+      type: 'INPUT',
+      label: '班级描述',
+      field: 'description',
+      placeholder: '请输入班级描述',
+      width: 140
     }
-    // {
-    //   type: 'INPUT',
-    //   label: '用户名',
-    //   field: 'user_name',
-    //   placeholder: '请输入用户名称',
-    //   width: 130,
-    // }, {
-    //   type: 'INPUT',
-    //   label: '用户手机号',
-    //   field: 'user_mobile',
-    //   placeholder: '请输入用户手机号',
-    //   width: 140,
-    // }, {
-    //   type: 'DATE',
-    //   label: '请选择入职日期',
-    //   field: 'user_date',
-    //   placeholder: '请输入日期',
-    // }
-  ]
+  ];
 
   componentDidMount() {
     this.requestList();
@@ -57,12 +46,14 @@ export default class User extends React.Component {
 
   handleFilter = (params) => {
     console.debug(`params=${JSON.stringify(params)}`);
-    if (params.name && params.name != "") {
-      this.params.url = '/class/search/findByNameLike';
+    if (params.name && params.name != '' ||
+      params.description && params.description != '') {
+      this.params.url = '/class/search/findByNameLikeAndDescriptionLike';
     } else {
       this.params.url = '/class';
     }
     this.params.name = '%' + params.name + '%';
+    this.params.description = '%' + params.description + '%';
     this.requestList();
   };
 
@@ -127,27 +118,43 @@ export default class User extends React.Component {
         }
       })
     }
-  }
+  };
 
   // 创建班级提交
   handleSubmit = () => {
-    let type = this.state.type;
-    let data = this.form.props.form.getFieldsValue();
-    axios.ajaxEntity({
-      url: type == 'create' ? '/class' : '/class/' + data.id,
-      method: type == 'create' ? 'post' : 'put',
-      data: {
-        params: data
+
+    let _this = this;
+
+    // 表单校验
+    const form = this.form.props.form;
+    form.validateFields((err, values) => {
+      if (err) {
+        return;
       }
-    }).then((res) => {
-      this.form.props.form.resetFields();
-      this.setState({
-        isVisible: false
+
+      // 提交表单
+      let type = _this.state.type;
+      let data = _this.form.props.form.getFieldsValue();
+      // 描述字段如果是空的，则设置空字符串
+      if (!data.description) {
+        data.description = '';
+      }
+      axios.ajaxEntity({
+        url: type == 'create' ? '/class' : '/class/' + data.id,
+        method: type == 'create' ? 'post' : 'put',
+        data: {
+          params: data
+        }
+      }).then((res) => {
+        _this.form.props.form.resetFields();
+        _this.setState({
+          isVisible: false
+        });
+        _this.requestList();
+      }).catch((error) => {
+        console.debug(error);
       })
-      this.requestList();
-    }).catch((error) => {
-      console.debug(error);
-    })
+    });
   };
 
   /**
@@ -246,7 +253,13 @@ class EditForm extends React.Component {
         <FormItem label="班级名称" {...formItemLayout}>
           {
             getFieldDecorator('name', {
-              initialValue: info.name
+              initialValue: info.name,
+              rules: [
+                {
+                  required: true,
+                  message: '请输入班级名称',
+                },
+              ],
             })(
               <Input type="text" placeholder="请输入班级名称"/>
             )

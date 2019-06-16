@@ -16,6 +16,10 @@ import java.util.List;
 @RepositoryRestResource(collectionResourceRel = "class", path = "class")
 public interface ClassRepository extends JpaRepository<ClassEntity, String> {
 
+    @RestResource(path = "findByNameLikeAndDescriptionLike", rel = "findByNameLikeAndDescriptionLike")
+    Page<ClassEntity> findByNameLikeAndDescriptionLike(
+            @Param("name") String name, @Param("description") String description, Pageable pageable);
+
     @RestResource(path = "findByNameLike", rel = "findByNameLike")
     Page<ClassEntity> findByNameLike(@Param("name") String name, Pageable pageable);
 
