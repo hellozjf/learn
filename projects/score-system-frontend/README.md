@@ -1133,13 +1133,13 @@ Matches are regular expressions, so that you can use a regexp to match multiple 
 {
   // ...
   "proxy": {
-    // Matches any request starting with /api
+    requestList
     "/api": {
       "target": "<url_1>",
       "ws": true
       // ...
     },
-    // Matches any request starting with /foo
+    requestList
     "/foo": {
       "target": "<url_2>",
       "ssl": true,

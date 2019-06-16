@@ -41,14 +41,12 @@ public abstract class BaseEntity {
      */
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonIgnore
-    private Date createDateTime;
+    private Date gmtCreate;
 
     /**
      * 更新时间
      */
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonIgnore
-    private Date modifiedDateTime;
+    private Date gmtModified;
 }
