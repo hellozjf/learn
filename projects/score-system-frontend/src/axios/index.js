@@ -36,7 +36,7 @@ export default class Axios {
       params: {
         page: params.page - 1,
         size: params.size,
-        sort: params.sort
+        sort: params.field + ',' + params.order
       }
     };
     this.ajaxEntity({

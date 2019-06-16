@@ -40,7 +40,8 @@ export default {
       showTotal: () => {
         return `共${data.page.totalElements}条`
       },
-      showQuickJumper: true
+      showQuickJumper: true,
+      showSizeChanger: true
     }
   },
   getOptionList(data) {

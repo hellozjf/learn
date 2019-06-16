@@ -13,8 +13,9 @@ export default class User extends React.Component {
 
   params = {
     page: 1,
-    size: 5,
-    sort: 'gmtCreate,asc'
+    size: 10,
+    field: 'gmtCreate',
+    order: 'asc',
   }
 
   state = {
@@ -22,6 +23,13 @@ export default class User extends React.Component {
   }
 
   formList = [
+    {
+      type: 'INPUT',
+      label: '班级名称',
+      field: 'name',
+      placeholder: '请输入班级名称',
+      width: 140
+    }
     // {
     //   type: 'INPUT',
     //   label: '用户名',
@@ -49,11 +57,11 @@ export default class User extends React.Component {
   handleFilter = (params) => {
     this.params = params;
     this.requestList();
-  }
+  };
 
   requestList = () => {
     axios.requestEntityList(this, '/class', this.params);
-  }
+  };
 
   // 功能区操作
   hanleOperate = (type) => {
@@ -62,7 +70,8 @@ export default class User extends React.Component {
       this.setState({
         type,
         isVisible: true,
-        title: '创建班级'
+        title: '创建班级',
+        info: null
       })
     } else if (type == 'edit') {
       if (!item) {
@@ -103,9 +112,9 @@ export default class User extends React.Component {
             });
             _this.requestList();
             _this.setState({
-              selectedRowKeys:null,
-              selectedItem:null,
-              selectedIds:null
+              selectedRowKeys: null,
+              selectedItem: null,
+              selectedIds: null
             });
           })
         }
@@ -134,18 +143,30 @@ export default class User extends React.Component {
     })
   };
 
+  /**
+   * 分页、过滤、排序
+   */
+  handleChange = (pagination, filters, sorter) => {
+    console.debug(`pagination=${JSON.stringify(pagination)}`);
+    console.debug(`filters=${filters}`);
+    console.debug(`sorter=${JSON.stringify(sorter)}`);
+    this.params.page = pagination.current;
+    this.params.size = pagination.pageSize;
+    this.params.field = sorter.field;
+    this.params.order = sorter.order == 'ascend' ? 'asc' : 'desc';
+    this.requestList();
+  };
+
   render() {
-    const columns = [
-      {
-        title: 'ID',
-        dataIndex: 'id'
-      }, {
-        title: '班级名称',
-        dataIndex: 'name'
-      }, {
-        title: '班级描述',
-        dataIndex: 'description',
-      },
+    const columns = [{
+      title: '班级名称',
+      dataIndex: 'name',
+      sorter: true,
+    }, {
+      title: '班级描述',
+      dataIndex: 'description',
+      sorter: true,
+    },
     ];
     return (
       <div>
@@ -158,12 +179,14 @@ export default class User extends React.Component {
           <Button type="primary" icon="delete" onClick={() => this.hanleOperate('delete')}>删除班级</Button>
           <ETable
             style={{marginTop: 16}}
+            size="middle"
             updateSelectedItem={Utils.updateSelectedItem.bind(this)}
             columns={columns}
             dataSource={this.state.list}
             selectedRowKeys={this.state.selectedRowKeys}
             selectedItem={this.state.selectedItem}
             pagination={this.state.pagination}
+            onChange={this.handleChange}
           />
         </Card>
         {/*<div className="content-wrap">*/}
@@ -231,7 +254,7 @@ class EditForm extends React.Component {
             )
           }
         </FormItem>
-        <FormItem label="创建时间" {...formItemLayout} style={{display:'none'}}>
+        <FormItem label="创建时间" {...formItemLayout} style={{display: 'none'}}>
           {
             getFieldDecorator('gmtCreate', {
               initialValue: info.gmtCreate
@@ -240,7 +263,7 @@ class EditForm extends React.Component {
             )
           }
         </FormItem>
-        <FormItem label="ID" {...formItemLayout} style={{display:'none'}}>
+        <FormItem label="修改时间" {...formItemLayout} style={{display: 'none'}}>
           {
             getFieldDecorator('gmtModified', {
               initialValue: info.gmtModified
