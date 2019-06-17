@@ -17,6 +17,7 @@
         <module>test-ftp</module>
         <module>mock-backend</module>
         <module>score-system</module>
+        <module>common</module>
     </modules>
 
 

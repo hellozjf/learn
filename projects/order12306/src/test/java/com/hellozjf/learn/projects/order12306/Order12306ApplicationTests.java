@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.hellozjf.learn.projects.order12306.constant.ResultEnum;
 import com.hellozjf.learn.projects.order12306.dto.NormalPassengerDTO;
 import com.hellozjf.learn.projects.order12306.dto.OrderTicketDTO;
 import com.hellozjf.learn.projects.order12306.dto.ResultDTO;
+import com.hellozjf.learn.projects.order12306.exception.Order12306Exception;
 import com.hellozjf.learn.projects.order12306.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -61,8 +63,8 @@ public class Order12306ApplicationTests {
     @Before
     public void before() {
         cookieStore = cookieStore();
-//        httpclient = getHttpClient(cookieStore);
-        httpclient = getProxyHttpClient(cookieStore);
+        httpclient = getHttpClient(cookieStore);
+//        httpclient = getProxyHttpClient(cookieStore);
         objectMapper = new ObjectMapper();
         random = new Random();
 
@@ -263,7 +265,7 @@ public class Order12306ApplicationTests {
     }
 
     private void passportWebLogin(String username, String password, String answer) throws URISyntaxException, IOException {
-        while (true) {
+        for (int i = 0; i < 1000; i++) {
             URI uri = new URIBuilder()
                     .setScheme("https")
                     .setHost("kyfw.12306.cn")
@@ -283,9 +285,10 @@ public class Order12306ApplicationTests {
             String responseString = getResponse(response);
             log.debug("responseString = {}", responseString);
             if (! StringUtils.isEmpty(responseString)) {
-                break;
+                return;
             }
         }
+        throw new Order12306Exception(ResultEnum.LOGIN_12306_ERROR);
     }
 
     private void otnLoginUserLogin() throws URISyntaxException, IOException {
