@@ -59,6 +59,10 @@ public class ResultDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String username;
 
+    @JsonProperty("name")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String name;
+
     @JsonProperty("validateMessagesShowId")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String validateMessagesShowId;

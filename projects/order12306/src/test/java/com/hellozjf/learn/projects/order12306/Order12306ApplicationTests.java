@@ -68,9 +68,9 @@ public class Order12306ApplicationTests {
 
         // 初始化OrderTicketDTO
         orderTicketDTO = new OrderTicketDTO();
-        orderTicketDTO.setTrainDate("2019-06-20");
+        orderTicketDTO.setTrainDate("2019-07-01");
         orderTicketDTO.setBackTrainDate(DateUtils.formatDate(new Date(), "yyyy-MM-dd"));
-        orderTicketDTO.setStationTrain("D379");
+        orderTicketDTO.setStationTrain("D655");
         orderTicketDTO.setFromStation("杭州");
         orderTicketDTO.setToStation("宁波");
         orderTicketDTO.setSeatType("二等座");
@@ -102,8 +102,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/HttpZF/GetJS")
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://www.12306.cn/index/");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         getResponse(response);
@@ -139,8 +137,6 @@ public class Order12306ApplicationTests {
                 .setParameter("timestamp", String.valueOf(System.currentTimeMillis()))
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://www.12306.cn/index/");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -162,8 +158,6 @@ public class Order12306ApplicationTests {
                 .setPath("/passport/web/auth/uamtk-static")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://www.12306.cn/index/");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("appid", "otn"));
@@ -182,8 +176,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/login/conf")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/resources/login.html");
 
         List<NameValuePair> formparams = new ArrayList<>();
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
@@ -201,8 +193,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/index12306/getLoginBanner")
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/resources/login.html");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -222,8 +212,6 @@ public class Order12306ApplicationTests {
                 .setParameter("_", String.valueOf(System.currentTimeMillis()))
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/resources/login.html");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -242,7 +230,6 @@ public class Order12306ApplicationTests {
                 .setPath("/result/base64")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("base64String", image));
@@ -269,8 +256,6 @@ public class Order12306ApplicationTests {
                 .setParameter("_", String.valueOf(System.currentTimeMillis()))
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/resources/login.html");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -278,25 +263,29 @@ public class Order12306ApplicationTests {
     }
 
     private void passportWebLogin(String username, String password, String answer) throws URISyntaxException, IOException {
-        URI uri = new URIBuilder()
-                .setScheme("https")
-                .setHost("kyfw.12306.cn")
-                .setPath("/passport/web/login")
-                .build();
-        HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
+        while (true) {
+            URI uri = new URIBuilder()
+                    .setScheme("https")
+                    .setHost("kyfw.12306.cn")
+                    .setPath("/passport/web/login")
+                    .build();
+            HttpPost httppost = new HttpPost(uri);
 
-        List<NameValuePair> formparams = new ArrayList<>();
-        formparams.add(new BasicNameValuePair("username", username));
-        formparams.add(new BasicNameValuePair("password", password));
-        formparams.add(new BasicNameValuePair("appid", "otn"));
-        formparams.add(new BasicNameValuePair("answer", answer));
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
-        httppost.setEntity(entity);
+            List<NameValuePair> formparams = new ArrayList<>();
+            formparams.add(new BasicNameValuePair("username", username));
+            formparams.add(new BasicNameValuePair("password", password));
+            formparams.add(new BasicNameValuePair("appid", "otn"));
+            formparams.add(new BasicNameValuePair("answer", answer));
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+            httppost.setEntity(entity);
 
-        CloseableHttpResponse response = httpclient.execute(httppost);
-        String responseString = getResponse(response);
-        log.debug("responseString = {}", responseString);
+            CloseableHttpResponse response = httpclient.execute(httppost);
+            String responseString = getResponse(response);
+            log.debug("responseString = {}", responseString);
+            if (! StringUtils.isEmpty(responseString)) {
+                break;
+            }
+        }
     }
 
     private void otnLoginUserLogin() throws URISyntaxException, IOException {
@@ -306,8 +295,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/login/userLogin")
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/resources/login.html");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         getResponse(response);
@@ -320,8 +307,6 @@ public class Order12306ApplicationTests {
                 .setPath("/passport/web/auth/uamtk")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/passport?redirect=/otn/login/userLogin");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("appid", "otn"));
@@ -343,8 +328,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/uamauthclient")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/passport?redirect=/otn/login/userLogin");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("tk", newapptk));
@@ -363,8 +346,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/index/initMy12306Api")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/view/index.html");
 
         List<NameValuePair> formparams = new ArrayList<>();
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
@@ -383,8 +364,6 @@ public class Order12306ApplicationTests {
                 .setParameter("linktypeid", "dc")
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/view/index.html");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -404,9 +383,6 @@ public class Order12306ApplicationTests {
                 .setParameter("purpose_codes", "ADULT")
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/leftTicket/init?linktypeid=dc");
-        httpget.setHeader("x-requested-with", "XMLHttpRequest");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -426,20 +402,9 @@ public class Order12306ApplicationTests {
                 .setParameter(String.valueOf(random.nextDouble()), null)
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httpget.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/leftTicket/init?linktypeid=dc");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
-//        log.debug("responseString = {}", responseString);
-
-//        addCookie(cookieStore, "_jc_save_fromStation", "杭州,HZH");
-//        addCookie(cookieStore, "_jc_save_fromStation", "%u676D%u5DDE%2CHZH");
-//        addCookie(cookieStore, "_jc_save_toStation", "宁波,NGH");
-//        addCookie(cookieStore, "_jc_save_toStation", "%u5B81%u6CE2%2CNGH");
-//        addCookie(cookieStore, "_jc_save_fromDate", "2019-06-12");
-//        addCookie(cookieStore, "_jc_save_toDate", "2019-06-06");
-//        addCookie(cookieStore, "_jc_save_wfdc_flag", "dc");
     }
 
     private Map<String, String> otnResourcesJsFrameworkStationName(String stationVersionUrl) throws URISyntaxException, IOException {
@@ -452,7 +417,6 @@ public class Order12306ApplicationTests {
                 .setParameter(params[0], params[1])
                 .build();
         HttpGet httpget = new HttpGet(uri);
-        httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
@@ -474,9 +438,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/login/checkUser")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/leftTicket/init?linktypeid=dc");
-        httppost.setHeader("x-requested-with", "XMLHttpRequest");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("_json_att", ""));
@@ -521,8 +482,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/checkOrderInfo")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader("x-requested-with", "XMLHttpRequest");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("cancel_flag", "2"));
@@ -549,9 +508,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/leftTicket/submitOrderRequest")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/leftTicket/init?linktypeid=dc");
-        httppost.setHeader("x-requested-with", "XMLHttpRequest");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("secretStr", secret));
@@ -576,9 +532,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/initDc")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/leftTicket/init?linktypeid=dc");
-        httppost.setHeader("x-requested-with", "XMLHttpRequest");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("_json_att", ""));
@@ -603,9 +556,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/getQueueCount")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/confirmPassenger/initDc");
-        httppost.setHeader("x-requested-with", "XMLHttpRequest");
 
         String trainDate = DateUtils.formatDate(new Date(), "EEE MMM dd yyyy") + " 00:00:00 GMT+0800 (中国标准时间)";
         String trainNo = ticketInfoForPassengerFormNode.get("orderRequestDTO").get("train_no").textValue();
@@ -647,9 +597,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/confirmSingleForQueue")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/confirmPassenger/initDc");
-        httppost.setHeader("x-requested-with", "XMLHttpRequest");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("passengerTicketStr", passengerTicketStr));
@@ -686,9 +633,6 @@ public class Order12306ApplicationTests {
                     .setParameter("REPEAT_SUBMIT_TOKEN", repeatSubmitToken)
                     .build();
             HttpGet httpget = new HttpGet(uri);
-            httpget.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-            httpget.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/confirmPassenger/initDc");
-            httpget.setHeader("x-requested-with", "XMLHttpRequest");
 
             CloseableHttpResponse response = httpclient.execute(httpget);
             String responseString = getResponse(response);
@@ -719,9 +663,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/resultOrderForDcQueue")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader(HttpHeaders.REFERER, "https://kyfw.12306.cn/otn/confirmPassenger/initDc");
-        httppost.setHeader("x-requested-with", "XMLHttpRequest");
 
         List<NameValuePair> formparams = new ArrayList<>();
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
@@ -739,8 +680,6 @@ public class Order12306ApplicationTests {
                 .setPath("/otn/confirmPassenger/getPassengerDTOs")
                 .build();
         HttpPost httppost = new HttpPost(uri);
-        httppost.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-        httppost.setHeader("x-requested-with", "XMLHttpRequest");
 
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("_json_att", ""));
@@ -871,6 +810,9 @@ public class Order12306ApplicationTests {
         String oldPassengerStr = getOldPassengerStr(normalPassengerDTO);
         otnConfirmPassengerCheckOrderInfo(globalRepeatSubmitToken, passengerTicketStr, oldPassengerStr);
         otnConfirmPassengerGetQueueCount(ticketInfoForPassengerFormNode, globalRepeatSubmitToken);
+
+        TimeUnit.SECONDS.sleep(3);
+
         otnConfirmPassengerConfirmSingleForQueue(passengerTicketStr, oldPassengerStr, ticketInfoForPassengerFormNode, globalRepeatSubmitToken);
         String orderId = otnConfirmPassengerQueryOrderWaitTime(globalRepeatSubmitToken);
         otnConfirmPassengerResultOrderForDcQueue();
