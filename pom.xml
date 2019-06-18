@@ -8,6 +8,7 @@
         <module>springboot2</module>
         <module>company</module>
         <module>projects</module>
+        <module>Java8InAction</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
