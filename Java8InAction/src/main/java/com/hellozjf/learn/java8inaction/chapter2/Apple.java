@@ -1,21 +1,38 @@
 package com.hellozjf.learn.java8inaction.chapter2;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author Jingfeng Zhou
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Apple {
     private String color;
     private Integer weight;
+
+    public Apple(String color, Integer weight) {
+        this.color = color;
+        this.weight = weight;
+    }
+
+    public Apple() {
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+    }
 
     public static void prettyPrintApple(List<Apple> inventory, AppleFormatter appleFormatter) {
         for (Apple apple : inventory) {
