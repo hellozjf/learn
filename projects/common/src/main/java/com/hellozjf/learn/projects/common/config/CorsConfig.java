@@ -1,4 +1,4 @@
-package com.hellozjf.learn.projects.order12306.config;
+package com.hellozjf.learn.projects.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

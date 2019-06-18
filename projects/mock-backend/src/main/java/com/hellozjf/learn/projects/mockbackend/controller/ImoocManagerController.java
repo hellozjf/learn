@@ -1,8 +1,8 @@
 package com.hellozjf.learn.projects.mockbackend.controller;
 
+import com.hellozjf.learn.projects.common.vo.ResultVO;
 import com.hellozjf.learn.projects.mockbackend.util.RandomValueUtils;
 import com.hellozjf.learn.projects.mockbackend.util.ResultUtils;
-import com.hellozjf.learn.projects.mockbackend.vo.ResultVO;
 import com.hellozjf.learn.projects.mockbackend.vo.TableDataVO;
 import com.hellozjf.learn.projects.mockbackend.vo.TablePageVO;
 import org.springframework.beans.factory.annotation.Autowired;

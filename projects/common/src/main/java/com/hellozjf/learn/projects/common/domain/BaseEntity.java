@@ -1,6 +1,5 @@
-package com.hellozjf.learn.projects.scoresystem.domain;
+package com.hellozjf.learn.projects.common.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
