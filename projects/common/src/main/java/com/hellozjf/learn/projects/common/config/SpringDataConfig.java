@@ -1,10 +1,11 @@
-package com.hellozjf.learn.projects.scoresystem.config;
+package com.hellozjf.learn.projects.common.config;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
@@ -15,21 +16,24 @@ import java.util.Set;
 /**
  * 参考：https://blog.csdn.net/winnershili/article/details/80433458
  *
+ * @EnableJpaAuditing 是用来自动生成BaseEntity中的gmtCreate和gmtModified
+ *
  * @author hellozjf
  */
 @Configuration
-public class SpringDataRestConfig {
+@EnableJpaAuditing
+public class SpringDataConfig {
 
     @Bean
     public RepositoryRestConfigurer repositoryRestConfigurer() {
 
         return new RepositoryRestConfigurerAdapter() {
             @Override
-            public void configureRepositoryRestConfiguration( RepositoryRestConfiguration config) {
+            public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
 
                 final ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
                 provider.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
-                final Set<BeanDefinition> beans = provider.findCandidateComponents("com.hellozjf.learn.projects.scoresystem.domain");
+                final Set<BeanDefinition> beans = provider.findCandidateComponents("com.hellozjf.learn");
                 for (final BeanDefinition bean : beans) {
                     try {
                         config.exposeIdsFor(Class.forName(bean.getBeanClassName()));

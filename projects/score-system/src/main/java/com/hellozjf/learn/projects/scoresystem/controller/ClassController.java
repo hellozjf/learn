@@ -1,9 +1,9 @@
 package com.hellozjf.learn.projects.scoresystem.controller;
 
+import com.hellozjf.learn.projects.common.vo.ResultVO;
 import com.hellozjf.learn.projects.scoresystem.domain.ClassEntity;
 import com.hellozjf.learn.projects.scoresystem.repository.ClassRepository;
 import com.hellozjf.learn.projects.scoresystem.util.ResultUtils;
-import com.hellozjf.learn.projects.scoresystem.vo.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

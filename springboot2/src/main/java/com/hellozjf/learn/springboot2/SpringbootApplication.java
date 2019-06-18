@@ -1,8 +1,11 @@
 package com.hellozjf.learn.springboot2;
 
+import com.hellozjf.learn.springboot2.util.SpringContextUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 /**
@@ -11,7 +14,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 @EnableJpaAuditing
 @Slf4j
-public class SpringbootApplication {
+public class SpringbootApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         // springboot默认不开启图形界面，通过设置headless(false)开启图形界面
@@ -20,4 +23,13 @@ public class SpringbootApplication {
                 .run(args);
     }
 
+    /**
+     * springboot启动完会回调的函数
+     * @param args
+     * @throws Exception
+     */
+    @Override
+    public void run(String... args) throws Exception {
+
+    }
 }

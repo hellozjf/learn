@@ -9,7 +9,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 /**
  * @author Jingfeng Zhou
  */
-@RepositoryRestResource(collectionResourceRel = "class", path = "class")
+@RepositoryRestResource(collectionResourceRel = "MultiThreadEntity", path = "MultiThreadEntity")
 public interface MultiThreadRepository extends JpaRepository<MultiThreadEntity, String> {
 
     @RestResource(path = "findTopByNameOrderByCountDesc", rel = "findTopByNameOrderByCountDesc")
