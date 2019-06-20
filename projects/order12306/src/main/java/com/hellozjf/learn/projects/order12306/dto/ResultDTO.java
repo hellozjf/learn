@@ -15,6 +15,10 @@ public class ResultDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String resultMessage;
 
+    @JsonProperty("uamtk")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String uamtk;
+
     @JsonProperty("result_code")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String resultCode;
@@ -56,6 +60,10 @@ public class ResultDTO {
     private String newapptk;
 
     @JsonProperty("userName")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String userName;
+
+    @JsonProperty("username")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String username;
 

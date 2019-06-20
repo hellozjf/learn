@@ -319,6 +319,7 @@ public class OrderRunnable implements Runnable {
 
         CloseableHttpResponse response = httpclient.execute(httpget);
         String responseString = getResponse(response);
+        responseString = RegexUtils.getMatch(responseString, ".*\\((.*)\\)");
         checkResultCode(responseString, "4");
     }
 
@@ -860,11 +861,11 @@ public class OrderRunnable implements Runnable {
         while (true) {
             ArrayNode arrayNode = otnLeftTicketQuery(leftTicketQueryUrl, trainDate, fromStationCode, toStationCode);
             String secret = getWantedTicketSecret(ticketInfoEntity, arrayNode);
+            // 将查询次数写入数据库中
+            ticketInfoEntity.setTryLeftTicketTimes(ticketInfoEntity.getTryLeftTicketTimes() + 1);
+            ticketInfoRepository.save(ticketInfoEntity);
             if (StringUtils.isEmpty(secret)) {
                 log.debug("目前{}无票，等待5s后重试", ticketInfoEntity.getStationTrain());
-                // 将查询次数写入数据库中
-                ticketInfoEntity.setTryLeftTicketTimes(ticketInfoEntity.getTryLeftTicketTimes() + 1);
-                ticketInfoRepository.save(ticketInfoEntity);
                 try {
                     TimeUnit.SECONDS.sleep(5);
                 } catch (InterruptedException e) {

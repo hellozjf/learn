@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -38,9 +40,15 @@ public class OrderController {
     public ResultVO grabbing(@Valid TicketInfoForm ticketInfoForm,
                              BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
+            String field = bindingResult.getFieldError().getField();
             String errMsg = bindingResult.getFieldError().getDefaultMessage();
             log.error("{}", errMsg);
-            return ResultUtils.error(ResultEnum.FORM_ERROR.getCode(), errMsg);
+            return ResultUtils.error(ResultEnum.FORM_ERROR.getCode(), field + errMsg);
+        }
+        List<TicketInfoEntity> ticketInfoEntityList = ticketInfoRepository.findByState(TicketStateEnum.GRABBING.getCode());
+        if (ticketInfoEntityList.size() != 0) {
+            // 已经在抢票中了，不允许再次抢票
+            return ResultUtils.error(ResultEnum.ALREADY_GRABBING);
         }
         TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
         BeanUtils.copyProperties(ticketInfoForm, ticketInfoEntity);
@@ -52,11 +60,11 @@ public class OrderController {
 
     @GetMapping("/search")
     public ResultVO search(String username) {
-        TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findByStateAndUsername(TicketStateEnum.GRABBING.getCode(), username).get();
-        if (ticketInfoEntity != null) {
-            return ResultUtils.success(ticketInfoEntity);
+        TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username).get();
+        if (ticketInfoEntity == null) {
+            return ResultUtils.error(ResultEnum.NOT_GRABBING_ANY_TICKET);
         } else {
-            return ResultUtils.success();
+            return ResultUtils.success(ticketInfoEntity);
         }
     }
 }

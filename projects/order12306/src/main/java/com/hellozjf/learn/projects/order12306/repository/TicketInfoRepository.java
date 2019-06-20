@@ -11,5 +11,6 @@ import java.util.Optional;
  */
 public interface TicketInfoRepository extends JpaRepository<TicketInfoEntity, String> {
     List<TicketInfoEntity> findByState(Integer state);
+    Optional<TicketInfoEntity> findTopByUsernameOrderByGmtCreateDesc(String username);
     Optional<TicketInfoEntity> findByStateAndUsername(Integer state, String username);
 }

@@ -12,7 +12,8 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(indexes = {
-        @Index(columnList = "state,username")
+        @Index(columnList = "state,username"),
+        @Index(columnList = "username,gmtCreate")
 })
 public class TicketInfoEntity extends BaseEntity {
 
