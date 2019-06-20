@@ -1,16 +1,25 @@
-package com.hellozjf.learn.projects.order12306.dto;
+package com.hellozjf.learn.projects.order12306.domain;
 
+import com.hellozjf.learn.projects.common.domain.BaseEntity;
+import com.hellozjf.learn.projects.order12306.constant.TicketStateEnum;
 import lombok.Data;
+
+import javax.persistence.*;
 
 /**
  * @author Jingfeng Zhou
  */
+@Entity
 @Data
-public class OrderTicketDTO {
+@Table(indexes = {
+        @Index(columnList = "state,username")
+})
+public class TicketInfoEntity extends BaseEntity {
 
     /**
      * 哪天出发，例如2019-04-26
      */
+    @Column
     private String trainDate;
 
     /**
@@ -57,4 +66,36 @@ public class OrderTicketDTO {
      * 需要通知的邮箱
      */
     private String email;
+
+    /**
+     * 购票状态
+     * @see TicketStateEnum
+     */
+    private Integer state;
+
+    /**
+     * 购票失败原因
+     */
+    @Lob
+    private String failedReason;
+
+    /**
+     * 失败的代码
+     */
+    private Integer resultCode;
+
+    /**
+     * 失败代码对应的描述
+     */
+    private String resultMessage;
+
+    /**
+     * 尝试登陆的次数
+     */
+    private Integer tryLoginTimes;
+
+    /**
+     * 余票查询的次数
+     */
+    private Integer tryLeftTicketTimes;
 }

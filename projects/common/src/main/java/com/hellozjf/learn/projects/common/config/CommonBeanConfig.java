@@ -12,7 +12,7 @@ import java.util.Random;
  */
 @Configuration
 @Slf4j
-public class BeanConfig {
+public class CommonBeanConfig {
 
     @Bean
     public ObjectMapper objectMapper() {

@@ -6,6 +6,7 @@
 
     <groupId>com.hellozjf.learn</groupId>
     <artifactId>Java8InAction</artifactId>
+    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>

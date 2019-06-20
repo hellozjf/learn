@@ -1,11 +1,9 @@
 package com.hellozjf.learn.springboot2;
 
-import com.hellozjf.learn.springboot2.util.SpringContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 /**
