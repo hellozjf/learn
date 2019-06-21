@@ -45,11 +45,12 @@ public class OrderController {
             log.error("{}", errMsg);
             return ResultUtils.error(ResultEnum.FORM_ERROR.getCode(), field + errMsg);
         }
-        List<TicketInfoEntity> ticketInfoEntityList = ticketInfoRepository.findByState(TicketStateEnum.GRABBING.getCode());
-        if (ticketInfoEntityList.size() != 0) {
+        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoForm.getUsername()).get();
+        if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
             // 已经在抢票中了，不允许再次抢票
             return ResultUtils.error(ResultEnum.ALREADY_GRABBING);
         }
+
         TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
         BeanUtils.copyProperties(ticketInfoForm, ticketInfoEntity);
         ticketInfoEntity.setTryLoginTimes(0);

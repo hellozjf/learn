@@ -12,10 +12,7 @@ import com.hellozjf.learn.projects.order12306.dto.NormalPassengerDTO;
 import com.hellozjf.learn.projects.order12306.dto.ResultDTO;
 import com.hellozjf.learn.projects.order12306.exception.Order12306Exception;
 import com.hellozjf.learn.projects.order12306.repository.TicketInfoRepository;
-import com.hellozjf.learn.projects.order12306.util.EnumUtils;
-import com.hellozjf.learn.projects.order12306.util.ExceptionUtils;
-import com.hellozjf.learn.projects.order12306.util.HttpClientUtils;
-import com.hellozjf.learn.projects.order12306.util.RegexUtils;
+import com.hellozjf.learn.projects.order12306.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
@@ -76,8 +73,18 @@ public class OrderRunnable implements Runnable {
 
     @Override
     public void run() {
+
+        // 如果传入的ticketInfoEntity为空，不允许开线程
         if (ticketInfoEntity == null) {
             log.error("ticketInfoEntity == null");
+            return;
+        }
+
+        // 如果当前该用户已经在抢票了，不允许开线程
+        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoEntity.getUsername()).get();
+        if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
+            // 已经在抢票中了，不允许再次抢票
+            log.error("{}", ResultEnum.ALREADY_GRABBING.getMessage());
             return;
         }
 

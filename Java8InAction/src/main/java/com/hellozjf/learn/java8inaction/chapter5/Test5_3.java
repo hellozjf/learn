@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 /**
  * @author Jingfeng Zhou
  */
-public class Test5_5 {
+public class Test5_3 {
     public static void main(String[] args) {
         Trader raoul = new Trader("Raoul", "Cambridge");
         Trader mario = new Trader("Mario","Milan");
