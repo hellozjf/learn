@@ -28,6 +28,7 @@ public enum ResultEnum implements CodeEnum {
     PASSPORT_CAPTCHA_CAPTCHA_IMAGE64_ERROR(16, "PASSPORT_CAPTCHA_CAPTCHA_IMAGE64_ERROR"),
     ALREADY_GRABBING(17, "已经在抢票中了，无法再开启抢票"),
     NOT_GRABBING_ANY_TICKET(18, "未曾抢过任何票"),
+    STOP_GRABBING(19, "停止抢票"),
     ;
 
     Integer code;
