@@ -1,11 +1,9 @@
 package com.hellozjf.learn.projects.order12306;
 
-import com.hellozjf.learn.projects.order12306.constant.ResultEnum;
 import com.hellozjf.learn.projects.order12306.constant.TicketStateEnum;
 import com.hellozjf.learn.projects.order12306.domain.TicketInfoEntity;
 import com.hellozjf.learn.projects.order12306.repository.TicketInfoRepository;
 import com.hellozjf.learn.projects.order12306.runnable.OrderRunnable;
-import com.hellozjf.learn.projects.order12306.util.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

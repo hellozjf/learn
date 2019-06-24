@@ -4,10 +4,8 @@ import com.hellozjf.learn.projects.common.config.SpringContextConfig;
 import com.hellozjf.learn.projects.order12306.constant.ResultEnum;
 import com.hellozjf.learn.projects.order12306.constant.TicketStateEnum;
 import com.hellozjf.learn.projects.order12306.domain.TicketInfoEntity;
-import com.hellozjf.learn.projects.order12306.exception.Order12306Exception;
 import com.hellozjf.learn.projects.order12306.repository.TicketInfoRepository;
 import com.hellozjf.learn.projects.order12306.service.Client12306Service;
-import com.hellozjf.learn.projects.order12306.util.EnumUtils;
 import com.hellozjf.learn.projects.order12306.util.ExceptionUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,15 +61,7 @@ public class OrderRunnable implements Runnable {
         } catch (Exception e) {
             // 抢票失败
             ticketInfoEntity.setState(TicketStateEnum.FAILED.getCode());
-            if (e instanceof Order12306Exception) {
-                Order12306Exception order12306Exception = (Order12306Exception) e;
-                ticketInfoEntity.setFailedReason(order12306Exception.getMessage());
-                ResultEnum resultEnum = EnumUtils.getByCode(order12306Exception.getCode(), ResultEnum.class);
-                ticketInfoEntity.setResultCode(resultEnum.getCode());
-                ticketInfoEntity.setResultMessage(resultEnum.getMessage());
-            } else {
-                ticketInfoEntity.setFailedReason(ExceptionUtils.getStackTrace(e));
-            }
+            ExceptionUtils.setFaileReason(ticketInfoEntity, e);
             ticketInfoRepository.save(ticketInfoEntity);
         }
     }

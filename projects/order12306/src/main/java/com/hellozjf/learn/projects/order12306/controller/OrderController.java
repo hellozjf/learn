@@ -6,10 +6,13 @@ import com.hellozjf.learn.projects.order12306.constant.TicketStateEnum;
 import com.hellozjf.learn.projects.order12306.domain.TicketInfoEntity;
 import com.hellozjf.learn.projects.order12306.dto.NormalPassengerDTO;
 import com.hellozjf.learn.projects.order12306.dto.TicketInfoDTO;
+import com.hellozjf.learn.projects.order12306.exception.Order12306Exception;
 import com.hellozjf.learn.projects.order12306.form.TicketInfoForm;
 import com.hellozjf.learn.projects.order12306.repository.TicketInfoRepository;
 import com.hellozjf.learn.projects.order12306.runnable.OrderRunnable;
 import com.hellozjf.learn.projects.order12306.service.Client12306Service;
+import com.hellozjf.learn.projects.order12306.util.EnumUtils;
+import com.hellozjf.learn.projects.order12306.util.ExceptionUtils;
 import com.hellozjf.learn.projects.order12306.util.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -96,9 +99,32 @@ public class OrderController {
      */
     @GetMapping("/queryTicketPeopleList")
     public ResultVO queryTicketPeopleList(String username, String password) throws IOException, URISyntaxException {
-        CloseableHttpClient httpClient = client12306Service.login(username, password);
-        List<NormalPassengerDTO> normalPassengerDTOList = client12306Service.queryTicketPeopleList(httpClient);
-        return ResultUtils.success(normalPassengerDTOList);
+
+        TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
+        ticketInfoEntity.setUsername(username);
+        ticketInfoEntity.setPassword(password);
+        ticketInfoEntity.setTryLoginTimes(0);
+        ticketInfoEntity.setTryLeftTicketTimes(0);
+        ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO.getCode());
+
+        try {
+            // 保存一条查询信息的记录，防止覆盖了正常抢票的记录
+            ticketInfoEntity = ticketInfoRepository.save(ticketInfoEntity);
+
+            CloseableHttpClient httpClient = client12306Service.login(username, password);
+            List<NormalPassengerDTO> normalPassengerDTOList = client12306Service.queryTicketPeopleList(httpClient);
+
+            // 查询信息成功
+            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_SUCCESS.getCode());
+            ticketInfoRepository.save(ticketInfoEntity);
+            return ResultUtils.success(normalPassengerDTOList);
+        } catch (Exception e) {
+            // 查询信息失败
+            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_FAILED.getCode());
+            ExceptionUtils.setFaileReason(ticketInfoEntity, e);
+            ticketInfoRepository.save(ticketInfoEntity);
+            return ResultUtils.error(ResultEnum.QUERY_TICKET_PEOPLE_INFO_FAILED);
+        }
     }
 
     /**
@@ -118,8 +144,31 @@ public class OrderController {
                        String trainDate,
                        String fromStation,
                        String toStation) throws IOException, URISyntaxException {
-        CloseableHttpClient httpClient = client12306Service.login(username, password);
-        List<TicketInfoDTO> ticketInfoDTOList = client12306Service.queryLeftTicketList(httpClient, trainDate, fromStation, toStation);
-        return ResultUtils.success(ticketInfoDTOList);
+
+        // 保存一条查询信息的记录，防止覆盖了正常抢票的记录
+        TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
+        ticketInfoEntity.setUsername(username);
+        ticketInfoEntity.setPassword(password);
+        ticketInfoEntity.setTryLoginTimes(0);
+        ticketInfoEntity.setTryLeftTicketTimes(0);
+        ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO.getCode());
+
+        try {
+            ticketInfoRepository.save(ticketInfoEntity);
+
+            CloseableHttpClient httpClient = client12306Service.login(username, password);
+            List<TicketInfoDTO> ticketInfoDTOList = client12306Service.queryLeftTicketList(httpClient, trainDate, fromStation, toStation);
+
+            // 查询信息成功
+            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_SUCCESS.getCode());
+            ticketInfoRepository.save(ticketInfoEntity);
+            return ResultUtils.success(ticketInfoDTOList);
+        } catch (Exception e) {
+            // 查询信息失败
+            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_FAILED.getCode());
+            ExceptionUtils.setFaileReason(ticketInfoEntity, e);
+            ticketInfoRepository.save(ticketInfoEntity);
+            return ResultUtils.error(ResultEnum.QUERY_LEFT_TICKET_INFO_FAILED);
+        }
     }
 }

@@ -99,6 +99,25 @@ public class Client12306ServiceImpl implements Client12306Service {
             ticketInfoDTO.setStationTrain(parts[3]);
             ticketInfoDTO.setBeginStationCode(parts[4]);
             ticketInfoDTO.setEndStationCode(parts[5]);
+            ticketInfoDTO.setFromStationCode(parts[6]);
+            ticketInfoDTO.setToStationCode(parts[7]);
+            ticketInfoDTO.setFromTime(parts[8]);
+            ticketInfoDTO.setToTime(parts[9]);
+            ticketInfoDTO.setDuringTime(parts[10]);
+            ticketInfoDTO.setTrainDate(parts[13]);
+            ticketInfoDTO.setAdvancedSoftSleeper(parts[21]);
+            ticketInfoDTO.setOther(parts[22]);
+            ticketInfoDTO.setSoftSleeper(parts[23]);
+            ticketInfoDTO.setSoftSeat(parts[24]);
+            ticketInfoDTO.setPrincipalSeat(parts[25]);
+            ticketInfoDTO.setNoSeat(parts[26]);
+            ticketInfoDTO.setHardSleeper(parts[28]);
+            ticketInfoDTO.setHardSeat(parts[29]);
+            ticketInfoDTO.setSecondClass(parts[30]);
+            ticketInfoDTO.setFirstClass(parts[31]);
+            ticketInfoDTO.setBusinessClass(parts[32]);
+            ticketInfoDTO.setStillLie(parts[33]);
+            ticketInfoDTOList.add(ticketInfoDTO);
         }
         return ticketInfoDTOList;
     }
@@ -134,8 +153,8 @@ public class Client12306ServiceImpl implements Client12306Service {
         otnConfirmPassengerCheckOrderInfo(httpClient, globalRepeatSubmitToken, passengerTicketStr, oldPassengerStr);
         otnConfirmPassengerGetQueueCount(httpClient, ticketInfoForPassengerFormNode, globalRepeatSubmitToken);
 
-        // 确认订单需要等待2秒，否则会报-100错误
-        TimeUnit.SECONDS.sleep(2);
+        // 确认订单需要等待3秒，否则会报-100错误
+        TimeUnit.SECONDS.sleep(3);
 
         otnConfirmPassengerConfirmSingleForQueue(httpClient, passengerTicketStr, oldPassengerStr, ticketInfoForPassengerFormNode, globalRepeatSubmitToken);
         String orderId = otnConfirmPassengerQueryOrderWaitTime(httpClient, globalRepeatSubmitToken);
@@ -236,7 +255,7 @@ public class Client12306ServiceImpl implements Client12306Service {
         httppost.setEntity(entity);
 
         CloseableHttpResponse response = httpClient.execute(httppost);
-        HttpClientUtils.getResponse(response);
+        String responseString = HttpClientUtils.getResponse(response);
     }
 
     private void otnLoginConf(CloseableHttpClient httpClient) throws IOException, URISyntaxException {
@@ -347,17 +366,17 @@ public class Client12306ServiceImpl implements Client12306Service {
             UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
             httppost.setEntity(entity);
 
+            // 把尝试登陆的次数+1，再存回数据库中
+            TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username).get();
+            ticketInfoEntity.setTryLoginTimes(ticketInfoEntity.getTryLoginTimes() + 1);
+            ticketInfoRepository.save(ticketInfoEntity);
+
             CloseableHttpResponse response = httpClient.execute(httppost);
             String responseString = HttpClientUtils.getResponse(response);
             if (!StringUtils.isEmpty(responseString)) {
                 ResultDTOUtils.checkResultCode(objectMapper, responseString, "0");
                 return;
             }
-
-            // 把尝试登陆的次数+1，再存回数据库中
-            TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username).get();
-            ticketInfoEntity.setTryLoginTimes(ticketInfoEntity.getTryLoginTimes() + 1);
-            ticketInfoRepository.save(ticketInfoEntity);
         }
         throw new Order12306Exception(ResultEnum.LOGIN_12306_ERROR);
     }

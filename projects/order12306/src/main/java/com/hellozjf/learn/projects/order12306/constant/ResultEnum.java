@@ -29,6 +29,8 @@ public enum ResultEnum implements CodeEnum {
     ALREADY_GRABBING(17, "已经在抢票中了，无法再开启抢票"),
     NOT_GRABBING_ANY_TICKET(18, "未曾抢过任何票"),
     STOP_GRABBING(19, "停止抢票"),
+    QUERY_TICKET_PEOPLE_INFO_FAILED(20, "查询乘车人信息失败"),
+    QUERY_LEFT_TICKET_INFO_FAILED(20, "查询余票信息失败"),
     ;
 
     Integer code;
