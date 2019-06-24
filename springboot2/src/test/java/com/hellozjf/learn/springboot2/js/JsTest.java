@@ -16,6 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,6 +44,10 @@ public class JsTest {
         String scriptString = null;
         if (httpEntity != null) {
             scriptString = EntityUtils.toString(httpEntity, StandardCharsets.UTF_8);
+        }
+        try (FileWriter fileWriter = new FileWriter("mock-min.js");
+             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+            bufferedWriter.write(scriptString, 0, scriptString.length());
         }
         engine.eval(scriptString);
         Object eval = engine.eval("Mock.Random.cname()");
