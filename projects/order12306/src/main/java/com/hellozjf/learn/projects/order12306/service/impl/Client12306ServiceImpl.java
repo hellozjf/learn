@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.hellozjf.learn.projects.order12306.config.CustomConfig;
 import com.hellozjf.learn.projects.order12306.constant.ResultEnum;
+import com.hellozjf.learn.projects.order12306.custom.FileCookieStore;
 import com.hellozjf.learn.projects.order12306.domain.TicketInfoEntity;
 import com.hellozjf.learn.projects.order12306.dto.NormalPassengerDTO;
 import com.hellozjf.learn.projects.order12306.dto.ResultDTO;
@@ -26,7 +28,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +67,12 @@ public class Client12306ServiceImpl implements Client12306Service {
     @Qualifier("mapSeatConf")
     private Map<String, Integer> mapSeatConf;
 
+    @Autowired
+    private CustomConfig customConfig;
+
     @Override
     public CloseableHttpClient login(String username, String password) throws IOException, URISyntaxException {
-        CookieStore cookieStore = new BasicCookieStore();
+        CookieStore cookieStore = new FileCookieStore(customConfig.getCookieFolderName(), username);
         CloseableHttpClient closeableHttpClient = HttpClientUtils.getHttpClient(cookieStore);
         login(closeableHttpClient, cookieStore, username, password);
         return closeableHttpClient;
@@ -125,7 +129,7 @@ public class Client12306ServiceImpl implements Client12306Service {
     @Override
     public void order(TicketInfoEntity ticketInfoEntity) throws IOException, URISyntaxException, InterruptedException {
         // 抢票前先要登录
-        CookieStore cookieStore = new BasicCookieStore();
+        CookieStore cookieStore = new FileCookieStore(customConfig.getCookieFolderName(), ticketInfoEntity.getUsername());
         CloseableHttpClient httpClient = HttpClientUtils.getHttpClient(cookieStore);
         login(httpClient, cookieStore, ticketInfoEntity.getUsername(), ticketInfoEntity.getPassword());
 
@@ -169,16 +173,18 @@ public class Client12306ServiceImpl implements Client12306Service {
     private void login(CloseableHttpClient httpClient, CookieStore cookieStore, String username, String password) throws IOException, URISyntaxException {
         otnHttpZFGetJS(httpClient);
         otnHttpZFLogdevice(httpClient, cookieStore);
-        passportWebAuthUamtkStatic(httpClient);
-        otnLoginConf(httpClient);
-        otnIndex12306GetLoginBanner(httpClient);
-        passportWebAuthUamtkStatic(httpClient);
-        String image = passportCaptchaCaptchaImage64(httpClient);
-        String check = getCheck(httpClient, image);
-        passportCaptchaCaptchaCheck(httpClient, check);
-        passportWebLogin(httpClient, username, password, check);
-        otnLoginUserLogin(httpClient);
-        String newapptk = passportWebAuthUamtk(httpClient);
+        String newapptk = passportWebAuthUamtkStatic(httpClient);
+        if (StringUtils.isEmpty(newapptk)) {
+            otnLoginConf(httpClient);
+            otnIndex12306GetLoginBanner(httpClient);
+            passportWebAuthUamtkStatic(httpClient);
+            String image = passportCaptchaCaptchaImage64(httpClient);
+            String check = getCheck(httpClient, image);
+            passportCaptchaCaptchaCheck(httpClient, check);
+            passportWebLogin(httpClient, username, password, check);
+            otnLoginUserLogin(httpClient);
+            newapptk = passportWebAuthUamtk(httpClient);
+        }
         otnUamauthclient(httpClient, newapptk);
         otnLoginUserLogin(httpClient);
         otnLoginConf(httpClient);
@@ -241,7 +247,7 @@ public class Client12306ServiceImpl implements Client12306Service {
         HttpClientUtils.addCookie(cookieStore, "RAIL_DEVICEID", resultDTO.getDfp());
     }
 
-    private void passportWebAuthUamtkStatic(CloseableHttpClient httpClient) throws IOException, URISyntaxException {
+    private String passportWebAuthUamtkStatic(CloseableHttpClient httpClient) throws IOException, URISyntaxException {
         URI uri = new URIBuilder()
                 .setScheme("https")
                 .setHost("kyfw.12306.cn")
@@ -256,6 +262,8 @@ public class Client12306ServiceImpl implements Client12306Service {
 
         CloseableHttpResponse response = httpClient.execute(httppost);
         String responseString = HttpClientUtils.getResponse(response);
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        return resultDTO.getNewapptk();
     }
 
     private void otnLoginConf(CloseableHttpClient httpClient) throws IOException, URISyntaxException {

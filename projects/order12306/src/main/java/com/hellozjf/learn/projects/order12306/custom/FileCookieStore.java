@@ -22,11 +22,32 @@ public class FileCookieStore implements CookieStore, Serializable {
     private transient ReadWriteLock lock;
     private File file;
 
+    /**
+     * 通过File创建FileCookieStore
+     * @param file
+     */
     public FileCookieStore(File file) {
         super();
         this.cookies = new TreeSet<>(new CookieIdentityComparator());
         this.lock = new ReentrantReadWriteLock();
         this.file = file;
+
+        syncFromFile();
+    }
+
+    /**
+     * 通过文件夹名称，文件名称创建FileCookieStore
+     * @param folderName
+     * @param fileName
+     */
+    public FileCookieStore(String folderName, String fileName) {
+        super();
+        File folder = new File(folderName);
+        folder.mkdirs();
+
+        this.cookies = new TreeSet<>(new CookieIdentityComparator());
+        this.lock = new ReentrantReadWriteLock();
+        this.file = new File(folder, fileName);
 
         syncFromFile();
     }
