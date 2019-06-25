@@ -37,133 +37,139 @@ public class CsadRunnable implements Runnable {
         Csadstate csadstate = csadstateRepository.findById(csadid).orElse(null);
         String groupId = csadstate.getGroupid();
         while (true) {
-            // 首先获取时间，如果时间在工作日9点-17点，才允许工作
-            LocalDateTime localDateTime = LocalDateTime.now();
-            int hour = localDateTime.getHour();
-            int weekday = localDateTime.getDayOfWeek().getValue();
-            if (customConfig.getStartHour() <= hour && hour < customConfig.getStopHour()
-                    && customConfig.getStartWeekDay() <= weekday && weekday < customConfig.getStopWeekDay()) {
-                // 说明是工作时间
-                int rand = random.nextInt(4);
-                if (rand < 2) {
-                    // 1/2概率，说明是签入
-                    int currentHour = hour;
-                    // 坐席仅在本小时内，要么是应答，要么是空闲
-                    while (currentHour == hour) {
-                        // 应答或空闲60-300秒
-                        int randTime = random.nextInt(300 - 60 + 1) + 60;
-                        rand = random.nextInt(3);
-                        changeState(CsadStateEnum.SIGN_IN);
-                        if (rand < 1) {
-                            // 1/3概率，说明是空闲状态
-                            SleepUtils.sleep(TimeUnit.SECONDS, randTime);
-                        } else {
-                            // 2/3概率，说明是应答状态
-                            int totalTime = randTime;
-                            int startTime = 0;
-                            String sessionId = UUID.randomUUID().toString();
-                            long servicetime = System.currentTimeMillis();
-                            String clientId = UUID.randomUUID().toString();
-                            // 往customservice表插入一条记录
-                            Customservice customservice = new Customservice();
-                            Customservice.Key customserviceKey = new Customservice.Key();
-                            customserviceKey.setClientId(clientId);
-                            customserviceKey.setCsadId(csadid);
-                            customservice.setKey(customserviceKey);
-                            customservice.setApplyType(1);
-                            customservice.setCacsiInformState(1);
-                            customservice.setClientType("WEB");
-                            customservice.setOvertimeClientInformState(1);
-                            customservice.setServiceTime(servicetime);
-                            customservice.setSessionClientInformState(1);
-                            customservice.setSessionCsadInformState(1);
-                            customservice.setSessionId(sessionId);
-                            customservice.setTimeClientLastest(System.currentTimeMillis());
-                            customservice.setTimeCsadLastest(System.currentTimeMillis());
-                            customserviceRepository.save(customservice);
-                            // 每1-10秒插入一条人工坐席消息
-                            while (startTime < totalTime) {
-                                Messageinfo messageinfo = new Messageinfo();
-                                Messageinfo.Key messageinfoKey = new Messageinfo.Key();
-                                messageinfoKey.setSpecifyPk(UUID.randomUUID().toString());
-                                messageinfoKey.setTimeSave(System.currentTimeMillis());
-                                messageinfoKey.setMessageId(UUID.randomUUID().toString());
-                                messageinfo.setKey(messageinfoKey);
-                                messageinfo.setChannelFrom("WEB");
-                                messageinfo.setChannelTo("WEB");
-                                messageinfo.setContent(RandomStringUtils.randomAlphanumeric(10, 51));
-                                messageinfo.setFromuser(csadid);
-                                messageinfo.setMsgtype(getMsgType());
-                                messageinfo.setNumSend(0);
-                                messageinfo.setSessionId(sessionId);
-                                messageinfo.setState(1);
-                                messageinfo.setStype(0);
-                                messageinfo.setTimeReceipt(null);
-                                messageinfo.setTimeSend(System.currentTimeMillis());
-                                messageinfo.setTouser(clientId);
-                                messageinfo.setType(1);
-                                log.debug("{} messagetemp: {}", csadid, messageinfo);
-                                messageinfoRepository.save(messageinfo);
-                                randTime = random.nextInt(10) + 1;
+            try {
+                // 首先获取时间，如果时间在工作日9点-17点，才允许工作
+                LocalDateTime localDateTime = LocalDateTime.now();
+                int hour = localDateTime.getHour();
+                int weekday = localDateTime.getDayOfWeek().getValue();
+                if (customConfig.getStartHour() <= hour && hour < customConfig.getStopHour()
+                        && customConfig.getStartWeekDay() <= weekday && weekday < customConfig.getStopWeekDay()) {
+                    // 说明是工作时间
+                    int rand = random.nextInt(4);
+                    if (rand < 2) {
+                        // 1/2概率，说明是签入
+                        int currentHour = hour;
+                        // 坐席仅在本小时内，要么是应答，要么是空闲
+                        while (currentHour == hour) {
+                            // 应答或空闲60-300秒
+                            int randTime = random.nextInt(300 - 60 + 1) + 60;
+                            rand = random.nextInt(3);
+                            changeState(CsadStateEnum.SIGN_IN);
+                            if (rand < 1) {
+                                // 1/3概率，说明是空闲状态
                                 SleepUtils.sleep(TimeUnit.SECONDS, randTime);
-                                startTime += randTime;
-                            }
-                            // 从customservice表移除之前插入的记录
-                            customserviceRepository.deleteById(customserviceKey);
-                            // 所有消息都发送完毕了，插入一条服务日志
-                            Servicelog servicelog = new Servicelog();
-                            Servicelog.Key servicelogKey = new Servicelog.Key();
-                            servicelogKey.setCsadid(csadid);
-                            servicelogKey.setClientid(clientId);
-                            servicelogKey.setServicetime(servicetime);
-                            servicelog.setKey(servicelogKey);
-                            servicelog.setClientInfo("{\"phone\":\"\"}");
-                            servicelog.setEndtype(1);
-                            servicelog.setServiceEndtime(System.currentTimeMillis());
-                            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                            servicelog.setServicedate(dateTimeFormatter.format(localDateTime));
-                            servicelog.setSessionId(sessionId);
-                            servicelog.setServiceId(String.valueOf(System.currentTimeMillis()));
-                            log.debug("{} servicelog: {}", csadid, servicelog);
-                            servicelogRepository.save(servicelog);
+                            } else {
+                                // 2/3概率，说明是应答状态
+                                int totalTime = randTime;
+                                int startTime = 0;
+                                String sessionId = UUID.randomUUID().toString();
+                                long servicetime = System.currentTimeMillis();
+                                String clientId = UUID.randomUUID().toString();
+                                // 往customservice表插入一条记录
+                                Customservice customservice = new Customservice();
+                                Customservice.Key customserviceKey = new Customservice.Key();
+                                customserviceKey.setClientId(clientId);
+                                customserviceKey.setCsadId(csadid);
+                                customservice.setKey(customserviceKey);
+                                customservice.setApplyType(1);
+                                customservice.setCacsiInformState(1);
+                                customservice.setClientType("WEB");
+                                customservice.setOvertimeClientInformState(1);
+                                customservice.setServiceTime(servicetime);
+                                customservice.setSessionClientInformState(1);
+                                customservice.setSessionCsadInformState(1);
+                                customservice.setSessionId(sessionId);
+                                customservice.setTimeClientLastest(System.currentTimeMillis());
+                                customservice.setTimeCsadLastest(System.currentTimeMillis());
+                                customserviceRepository.save(customservice);
+                                // 每1-10秒插入一条人工坐席消息
+                                while (startTime < totalTime) {
+                                    Messageinfo messageinfo = new Messageinfo();
+                                    Messageinfo.Key messageinfoKey = new Messageinfo.Key();
+                                    messageinfoKey.setSpecifyPk(UUID.randomUUID().toString());
+                                    messageinfoKey.setTimeSave(System.currentTimeMillis());
+                                    messageinfoKey.setMessageId(UUID.randomUUID().toString());
+                                    messageinfo.setKey(messageinfoKey);
+                                    messageinfo.setChannelFrom("WEB");
+                                    messageinfo.setChannelTo("WEB");
+                                    messageinfo.setContent(RandomStringUtils.randomAlphanumeric(10, 51));
+                                    messageinfo.setFromuser(csadid);
+                                    messageinfo.setMsgtype(getMsgType());
+                                    messageinfo.setNumSend(0);
+                                    messageinfo.setSessionId(sessionId);
+                                    messageinfo.setState(1);
+                                    messageinfo.setStype(0);
+                                    messageinfo.setTimeReceipt(null);
+                                    messageinfo.setTimeSend(System.currentTimeMillis());
+                                    messageinfo.setTouser(clientId);
+                                    messageinfo.setType(1);
+                                    log.debug("{} messagetemp: {}", csadid, messageinfo);
+                                    messageinfoRepository.save(messageinfo);
+                                    randTime = random.nextInt(10) + 1;
+                                    SleepUtils.sleep(TimeUnit.SECONDS, randTime);
+                                    startTime += randTime;
+                                }
+                                // 从customservice表移除之前插入的记录
+                                customserviceRepository.deleteById(customserviceKey);
+                                // 所有消息都发送完毕了，插入一条服务日志
+                                Servicelog servicelog = new Servicelog();
+                                Servicelog.Key servicelogKey = new Servicelog.Key();
+                                servicelogKey.setCsadid(csadid);
+                                servicelogKey.setClientid(clientId);
+                                servicelogKey.setServicetime(servicetime);
+                                servicelog.setKey(servicelogKey);
+                                servicelog.setClientInfo("{\"phone\":\"\"}");
+                                servicelog.setEndtype(1);
+                                servicelog.setServiceEndtime(System.currentTimeMillis());
+                                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                servicelog.setServicedate(dateTimeFormatter.format(localDateTime));
+                                servicelog.setSessionId(sessionId);
+                                servicelog.setServiceId(String.valueOf(System.currentTimeMillis()));
+                                log.debug("{} servicelog: {}", csadid, servicelog);
+                                servicelogRepository.save(servicelog);
 
-                            if (willAnswerSurvey()) {
-                                // 如果会答复满意率调查表，则插入满意率调查结果
-                                Cacsiresult cacsiresult = new Cacsiresult();
-                                Cacsiresult.Key cacsiresultKey = new Cacsiresult.Key();
-                                cacsiresultKey.setClientid(clientId);
-                                cacsiresultKey.setSavetime(System.currentTimeMillis());
-                                cacsiresult.setKey(cacsiresultKey);
-                                cacsiresult.setCacsi(getSurveyResult());
-                                cacsiresult.setSessionid(sessionId);
-                                cacsiresultRepository.save(cacsiresult);
+                                if (willAnswerSurvey()) {
+                                    // 如果会答复满意率调查表，则插入满意率调查结果
+                                    Cacsiresult cacsiresult = new Cacsiresult();
+                                    Cacsiresult.Key cacsiresultKey = new Cacsiresult.Key();
+                                    cacsiresultKey.setClientid(clientId);
+                                    cacsiresultKey.setSavetime(System.currentTimeMillis());
+                                    cacsiresult.setKey(cacsiresultKey);
+                                    cacsiresult.setCacsi(getSurveyResult());
+                                    cacsiresult.setSessionid(sessionId);
+                                    cacsiresultRepository.save(cacsiresult);
+                                }
                             }
+                            localDateTime = LocalDateTime.now();
+                            hour = localDateTime.getHour();
                         }
-                        localDateTime = LocalDateTime.now();
-                        hour = localDateTime.getHour();
-                    }
-                } else if (rand < 3) {
-                    // 1/4概率，说明是示忙，将坐席状态修改为示忙，然后等待1小时之后再次尝试
-                    changeState(CsadStateEnum.BUSY);
-                    int currentHour = hour;
-                    while (currentHour == hour) {
-                        SleepUtils.sleep(TimeUnit.MINUTES, 1);
-                        localDateTime = LocalDateTime.now();
-                        hour = localDateTime.getHour();
+                    } else if (rand < 3) {
+                        // 1/4概率，说明是示忙，将坐席状态修改为示忙，然后等待1小时之后再次尝试
+                        changeState(CsadStateEnum.BUSY);
+                        int currentHour = hour;
+                        while (currentHour == hour) {
+                            SleepUtils.sleep(TimeUnit.MINUTES, 1);
+                            localDateTime = LocalDateTime.now();
+                            hour = localDateTime.getHour();
+                        }
+                    } else {
+                        // 1/4概率，说明是离线，将坐席状态修改为离线，然后等待1小时之后再次尝试
+                        changeState(CsadStateEnum.SIGN_OUT);
+                        int currentHour = hour;
+                        while (currentHour == hour) {
+                            SleepUtils.sleep(TimeUnit.MINUTES, 1);
+                            localDateTime = LocalDateTime.now();
+                            hour = localDateTime.getHour();
+                        }
                     }
                 } else {
-                    // 1/4概率，说明是离线，将坐席状态修改为离线，然后等待1小时之后再次尝试
+                    // 说明不是工作时间，将坐席状态修改为离线，然后等待1分钟之后再次尝试
                     changeState(CsadStateEnum.SIGN_OUT);
-                    int currentHour = hour;
-                    while (currentHour == hour) {
-                        SleepUtils.sleep(TimeUnit.MINUTES, 1);
-                        localDateTime = LocalDateTime.now();
-                        hour = localDateTime.getHour();
-                    }
+                    SleepUtils.sleep(TimeUnit.MINUTES, 1);
                 }
-            } else {
-                // 说明不是工作时间，将坐席状态修改为离线，然后等待1分钟之后再次尝试
-                changeState(CsadStateEnum.SIGN_OUT);
+            } catch (Exception e) {
+                // 不知道啥原因就报错了，休眠1分钟后再次启动，防止线程退出
+                log.error("e = {}", e);
                 SleepUtils.sleep(TimeUnit.MINUTES, 1);
             }
         }
