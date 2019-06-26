@@ -2,6 +2,8 @@ package com.hellozjf.learn.projects.order12306.dto;
 
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * 车票信息
  *
@@ -75,9 +77,19 @@ public class TicketInfoDTO {
     private String fromStationCode;
 
     /**
+     * 出发站名称
+     */
+    private String fromStation;
+
+    /**
      * 到达站代码，index:7
      */
     private String toStationCode;
+
+    /**
+     * 到达站名称
+     */
+    private String toStation;
 
     /**
      * 出发时间，index:8

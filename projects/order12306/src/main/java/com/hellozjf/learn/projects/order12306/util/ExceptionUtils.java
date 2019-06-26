@@ -33,6 +33,15 @@ public class ExceptionUtils {
         return sw.toString();
     }
 
+    public static String getFailedReason(Exception e) {
+        if (e instanceof Order12306Exception) {
+            Order12306Exception order12306Exception = (Order12306Exception) e;
+            return order12306Exception.getMessage();
+        } else {
+            return ExceptionUtils.getStackTrace(e);
+        }
+    }
+
     /**
      * 设置失败原因
      * @param ticketInfoEntity
@@ -41,12 +50,12 @@ public class ExceptionUtils {
     public static void setFaileReason(TicketInfoEntity ticketInfoEntity, Exception e) {
         if (e instanceof Order12306Exception) {
             Order12306Exception order12306Exception = (Order12306Exception) e;
-            ticketInfoEntity.setFailedReason(order12306Exception.getMessage());
+            ticketInfoEntity.setFailedReason(getFailedReason(e));
             ResultEnum resultEnum = EnumUtils.getByCode(order12306Exception.getCode(), ResultEnum.class);
             ticketInfoEntity.setResultCode(resultEnum.getCode());
             ticketInfoEntity.setResultMessage(resultEnum.getMessage());
         } else {
-            ticketInfoEntity.setFailedReason(ExceptionUtils.getStackTrace(e));
+            ticketInfoEntity.setFailedReason(getFailedReason(e));
         }
     }
 }

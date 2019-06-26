@@ -48,5 +48,5 @@ public interface Client12306Service {
      * @throws URISyntaxException
      * @throws InterruptedException
      */
-    void order(TicketInfoEntity ticketInfoEntity) throws IOException, URISyntaxException, InterruptedException;
+    String order(TicketInfoEntity ticketInfoEntity) throws IOException, URISyntaxException, InterruptedException;
 }

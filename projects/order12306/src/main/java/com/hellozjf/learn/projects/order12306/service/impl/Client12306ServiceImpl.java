@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.hellozjf.learn.projects.order12306.config.CustomConfig;
 import com.hellozjf.learn.projects.order12306.constant.ResultEnum;
+import com.hellozjf.learn.projects.order12306.constant.TicketStateEnum;
 import com.hellozjf.learn.projects.order12306.custom.FileCookieStore;
 import com.hellozjf.learn.projects.order12306.domain.TicketInfoEntity;
 import com.hellozjf.learn.projects.order12306.dto.NormalPassengerDTO;
@@ -32,7 +33,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
@@ -56,9 +56,6 @@ public class Client12306ServiceImpl implements Client12306Service {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private JavaMailSender mailSender;
 
     @Autowired
     private TicketInfoRepository ticketInfoRepository;
@@ -92,6 +89,7 @@ public class Client12306ServiceImpl implements Client12306Service {
         Map<String, String> nameCodeMap = otnResourcesJsFrameworkStationName(httpClient, stationVersionUrl);
         String fromStationCode = nameCodeMap.get(fromStation);
         String toStationCode = nameCodeMap.get(toStation);
+        Map<String, String> codeNameMap = exchangeMap(nameCodeMap);
         ArrayNode arrayNode = otnLeftTicketQuery(httpClient, leftTicketQueryUrl, trainDate, fromStationCode, toStationCode);
         log.debug("arrayNode = {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arrayNode));
 
@@ -104,7 +102,9 @@ public class Client12306ServiceImpl implements Client12306Service {
             ticketInfoDTO.setBeginStationCode(parts[4]);
             ticketInfoDTO.setEndStationCode(parts[5]);
             ticketInfoDTO.setFromStationCode(parts[6]);
+            ticketInfoDTO.setFromStation(codeNameMap.get(parts[6]));
             ticketInfoDTO.setToStationCode(parts[7]);
+            ticketInfoDTO.setToStation(codeNameMap.get(parts[7]));
             ticketInfoDTO.setFromTime(parts[8]);
             ticketInfoDTO.setToTime(parts[9]);
             ticketInfoDTO.setDuringTime(parts[10]);
@@ -126,8 +126,16 @@ public class Client12306ServiceImpl implements Client12306Service {
         return ticketInfoDTOList;
     }
 
+    private Map<String, String> exchangeMap(Map<String, String> nameCodeMap) {
+        Map<String, String> codeNameMap = new HashMap<>();
+        for (Map.Entry<String, String> entry : nameCodeMap.entrySet()) {
+            codeNameMap.put(entry.getValue(), entry.getKey());
+        }
+        return codeNameMap;
+    }
+
     @Override
-    public void order(TicketInfoEntity ticketInfoEntity) throws IOException, URISyntaxException, InterruptedException {
+    public String order(TicketInfoEntity ticketInfoEntity) throws IOException, URISyntaxException, InterruptedException {
         // 抢票前先要登录
         CookieStore cookieStore = new FileCookieStore(customConfig.getCookieFolderName(), ticketInfoEntity.getUsername());
         CloseableHttpClient httpClient = HttpClientUtils.getHttpClient(cookieStore);
@@ -164,10 +172,7 @@ public class Client12306ServiceImpl implements Client12306Service {
         String orderId = otnConfirmPassengerQueryOrderWaitTime(httpClient, globalRepeatSubmitToken);
         otnConfirmPassengerResultOrderForDcQueue(httpClient);
 
-        // 如果填写了邮箱的话，就发送通知邮件
-        if (!StringUtils.isEmpty(ticketInfoEntity.getEmail())) {
-            sendEmail(orderId, ticketInfoEntity);
-        }
+        return orderId;
     }
 
     private void login(CloseableHttpClient httpClient, CookieStore cookieStore, String username, String password) throws IOException, URISyntaxException {
@@ -613,6 +618,11 @@ public class Client12306ServiceImpl implements Client12306Service {
         while (true) {
             ArrayNode arrayNode = otnLeftTicketQuery(closeableHttpClient, leftTicketQueryUrl, trainDate, fromStationCode, toStationCode);
             String secret = getWantedTicketSecret(ticketInfoEntity, arrayNode, mapSeatConf);
+            ticketInfoEntity = ticketInfoRepository.findByStateAndUsername(TicketStateEnum.GRABBING.getCode(), ticketInfoEntity.getUsername()).get();
+            if (ticketInfoEntity == null) {
+                // 说明抢票被终止了，那就返回空字符串表示异常
+                throw new Order12306Exception(ResultEnum.GRABBING_STOPED_BY_HAND);
+            }
             // 将查询次数写入数据库中
             ticketInfoEntity.setTryLeftTicketTimes(ticketInfoEntity.getTryLeftTicketTimes() + 1);
             ticketInfoRepository.save(ticketInfoEntity);
@@ -867,23 +877,5 @@ public class Client12306ServiceImpl implements Client12306Service {
         CloseableHttpResponse response = httpClient.execute(httppost);
         String responseString = HttpClientUtils.getResponse(response);
         ResultDTOUtils.checkStatus(objectMapper, ResultEnum.OTN_CONFIRM_PASSENGER_RESULT_ORDER_FOR_DC_QUEUE_ERROR, responseString);
-    }
-
-    private void sendEmail(String orderId, TicketInfoEntity ticketInfoEntity) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("908686171@qq.com");
-        message.setTo(ticketInfoEntity.getEmail());
-        message.setSubject("火车票抢票成功");
-        // 恭喜您订票成功，订单号为：E898599288, 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付!
-        String text = String.format("%s，从%s到%s，列车%s，乘车人%s，已抢票成功，订单编号%s，请尽快登录12306支付购买",
-                ticketInfoEntity.getTrainDate(),
-                ticketInfoEntity.getFromStation(),
-                ticketInfoEntity.getToStation(),
-                ticketInfoEntity.getStationTrain(),
-                ticketInfoEntity.getTicketPeople(),
-                orderId);
-        message.setText(text);
-
-        mailSender.send(message);
     }
 }

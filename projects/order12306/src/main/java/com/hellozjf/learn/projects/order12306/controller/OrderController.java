@@ -14,6 +14,7 @@ import com.hellozjf.learn.projects.order12306.service.Client12306Service;
 import com.hellozjf.learn.projects.order12306.util.EnumUtils;
 import com.hellozjf.learn.projects.order12306.util.ExceptionUtils;
 import com.hellozjf.learn.projects.order12306.util.ResultUtils;
+import com.hellozjf.learn.projects.order12306.vo.TicketInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.BeanUtils;
@@ -88,7 +89,27 @@ public class OrderController {
         if (ticketInfoEntity == null) {
             return ResultUtils.error(ResultEnum.NOT_GRABBING_ANY_TICKET);
         } else {
-            return ResultUtils.success(ticketInfoEntity);
+            TicketInfoVO ticketInfoVO = new TicketInfoVO();
+            BeanUtils.copyProperties(ticketInfoEntity, ticketInfoVO);
+            ticketInfoVO.setStateString(EnumUtils.getByCode(ticketInfoVO.getState(), TicketStateEnum.class).getDesc());
+            return ResultUtils.success(ticketInfoVO);
+        }
+    }
+
+    /**
+     * 停止抢票
+     * @param username
+     * @return
+     */
+    @PostMapping("/stopGrabbing")
+    public ResultVO stopGrabbing(String username) {
+        TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username).get();
+        if (ticketInfoEntity == null) {
+            return ResultUtils.error(ResultEnum.NOT_GRABBING_ANY_TICKET);
+        } else {
+            ticketInfoEntity.setState(TicketStateEnum.STOP_BY_HAND.getCode());
+            ticketInfoRepository.save(ticketInfoEntity);
+            return ResultUtils.success();
         }
     }
 

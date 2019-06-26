@@ -4,10 +4,14 @@ import com.hellozjf.learn.projects.common.config.SpringContextConfig;
 import com.hellozjf.learn.projects.order12306.constant.ResultEnum;
 import com.hellozjf.learn.projects.order12306.constant.TicketStateEnum;
 import com.hellozjf.learn.projects.order12306.domain.TicketInfoEntity;
+import com.hellozjf.learn.projects.order12306.exception.Order12306Exception;
 import com.hellozjf.learn.projects.order12306.repository.TicketInfoRepository;
 import com.hellozjf.learn.projects.order12306.service.Client12306Service;
+import com.hellozjf.learn.projects.order12306.util.EmailUtils;
 import com.hellozjf.learn.projects.order12306.util.ExceptionUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.mail.javamail.JavaMailSender;
 
 /**
  * 购票线程体
@@ -17,11 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OrderRunnable implements Runnable {
 
+    private JavaMailSender mailSender;
     private TicketInfoEntity ticketInfoEntity;
     private TicketInfoRepository ticketInfoRepository;
     private Client12306Service client12306Service;
 
     public OrderRunnable(TicketInfoEntity ticketInfoEntity) {
+        mailSender = SpringContextConfig.getBean(JavaMailSender.class);
         ticketInfoRepository = SpringContextConfig.getBean(TicketInfoRepository.class);
         client12306Service = SpringContextConfig.getBean(Client12306Service.class);
 
@@ -53,13 +59,30 @@ public class OrderRunnable implements Runnable {
 
         try {
             // 抢票
-            client12306Service.order(ticketInfoEntity);
+            String orderId = client12306Service.order(ticketInfoEntity);
+
+            // 如果填写了邮箱的话，就发送通知邮件
+            if (!StringUtils.isEmpty(ticketInfoEntity.getEmail())) {
+                EmailUtils.sendSuccessEmail(mailSender, orderId, ticketInfoEntity);
+            }
 
             // 抢票成功
             ticketInfoEntity.setState(TicketStateEnum.SUCCESS.getCode());
             ticketInfoRepository.save(ticketInfoEntity);
         } catch (Exception e) {
+
+            // 如果填写了邮箱的话，就发送通知邮件
+            if (!StringUtils.isEmpty(ticketInfoEntity.getEmail())) {
+                EmailUtils.sendFailedEmail(mailSender, ticketInfoEntity, e);
+            }
+
             // 抢票失败
+            if (e instanceof Order12306Exception) {
+                Order12306Exception order12306Exception = (Order12306Exception) e;
+                if (order12306Exception.getCode().intValue() == TicketStateEnum.STOP_BY_HAND.getCode()) {
+                    return;
+                }
+            }
             ticketInfoEntity.setState(TicketStateEnum.FAILED.getCode());
             ExceptionUtils.setFaileReason(ticketInfoEntity, e);
             ticketInfoRepository.save(ticketInfoEntity);

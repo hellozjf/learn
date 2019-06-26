@@ -14,6 +14,7 @@ public enum TicketStateEnum implements CodeEnum {
     SUCCESS(2, "抢票成功"),
     FAILED(3, "抢票失败"),
     PAUSE(4, "暂停抢票"),
+    STOP_BY_HAND(5, "手动停止抢票"),
 
     QUERY_INFO(11, "查询信息中"),
     QUERY_INFO_SUCCESS(12, "查询信息成功"),
