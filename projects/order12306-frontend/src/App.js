@@ -28,8 +28,8 @@ class GrabTicketForm extends React.Component {
       baseURL: 'http://127.0.0.1:12307',
       timeout: 5000,
       params: {
-        'username': formInfo.username,
-        'password': formInfo.password
+        username: formInfo.username,
+        password: formInfo.password
       }
     }).then((response)=> {
       console.debug(response);
@@ -40,6 +40,33 @@ class GrabTicketForm extends React.Component {
       } else {
         console.error(`failed status=${response.status} code=${response.data.code}`)
       }
+    });
+  };
+
+  getLeftTicketList = () => {
+    let formInfo = this.props.form.getFieldsValue();
+    console.debug(formInfo);
+    axios({
+      url: '/order/queryLeftTicketList',
+      method: 'get',
+      baseURL: 'http://127.0.0.1:12307',
+      timeout: 5000,
+      params: {
+        username: formInfo.username,
+        password: formInfo.password,
+        trainDate: formInfo.trainDate.format("YYYY-MM-DD"),
+        fromStation: formInfo.fromStation,
+        toStation: formInfo.toStation
+      }
+    }).then((response)=> {
+      console.debug(response);
+      // if (response.status == 200 && response.data.code == 0) {
+      //   this.setState({
+      //     ticketPeopleList: response.data.data
+      //   })
+      // } else {
+      //   console.error(`failed status=${response.status} code=${response.data.code}`)
+      // }
     });
   };
 
@@ -99,7 +126,7 @@ class GrabTicketForm extends React.Component {
             <Select>
               {
                 (this.state.ticketPeopleList).map((item, index) => {
-                  return <Option key={index} value={item.code}>{item.passenger_name}</Option>
+                  return <Option key={index} value={item.passenger_name}>{item.passenger_name}</Option>
                 })
               }
             </Select>
@@ -140,7 +167,7 @@ class GrabTicketForm extends React.Component {
             sm: {span: 8, offset: 8},
           }}
         >
-          <Button htmlType="button">
+          <Button htmlType="button" onClick={this.getLeftTicketList}>
             查询车次
           </Button>
         </Form.Item>
