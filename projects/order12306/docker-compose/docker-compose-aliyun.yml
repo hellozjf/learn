@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  order12306:
+    image: nginx:1.15.12
+    restart: unless-stopped
+    volumes:
+      - /root/docker/order12306/nginx-order12306.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 12307:12307
+    environment:
+      - TZ=Asia/Shanghai
+  order12306-frontend:
+    image: nginx:1.15.12
+    restart: unless-stopped
+    volumes:
+      - /root/docker/order12306/build:/usr/share/nginx/html
+    ports:
+      - 12308:80
+    environment:
+      - TZ=Asia/Shanghai
+

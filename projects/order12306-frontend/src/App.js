@@ -12,7 +12,7 @@ class GrabTicketForm extends React.Component {
     leftTicketList: [],
   };
 
-  baseUrl = "http://vultr.hellozjf.com:12307";
+  baseUrl = "http://aliyun.hellozjf.com:12307";
 
   columns = [
     {
