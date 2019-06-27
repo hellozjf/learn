@@ -29,7 +29,6 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -64,7 +63,7 @@ public class OrderController {
             log.error("{}", errMsg);
             return ResultUtils.error(ResultEnum.FORM_ERROR.getCode(), field + errMsg);
         }
-        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoForm.getUsername()).get();
+        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoForm.getUsername());
         if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
             // 已经在抢票中了，不允许再次抢票
             return ResultUtils.error(ResultEnum.ALREADY_GRABBING);
@@ -85,7 +84,7 @@ public class OrderController {
      */
     @GetMapping("/queryState")
     public ResultVO queryState(String username) {
-        TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username).get();
+        TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username);
         if (ticketInfoEntity == null) {
             return ResultUtils.error(ResultEnum.NOT_GRABBING_ANY_TICKET);
         } else {
@@ -103,7 +102,7 @@ public class OrderController {
      */
     @PostMapping("/stopGrabbing")
     public ResultVO stopGrabbing(String username) {
-        TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username).get();
+        TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username);
         if (ticketInfoEntity == null) {
             return ResultUtils.error(ResultEnum.NOT_GRABBING_ANY_TICKET);
         } else {
@@ -120,6 +119,11 @@ public class OrderController {
      */
     @GetMapping("/queryTicketPeopleList")
     public ResultVO queryTicketPeopleList(String username, String password) throws IOException, URISyntaxException {
+
+        // 查询前先要判断当前有没有在抢票，如果在抢票中，不允许获取乘客订单，否则抢票的账号会被下线的
+        if (checkGrabbing(username, password)) {
+            return ResultUtils.error(ResultEnum.ALREADY_GRABBING_CAN_NOT_GET_INFO);
+        }
 
         TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
         ticketInfoEntity.setUsername(username);
@@ -166,6 +170,11 @@ public class OrderController {
                        String fromStation,
                        String toStation) throws IOException, URISyntaxException {
 
+        // 查询前先要判断当前有没有在抢票，如果在抢票中，不允许获取乘客订单，否则抢票的账号会被下线的
+        if (checkGrabbing(username, password)) {
+            return ResultUtils.error(ResultEnum.ALREADY_GRABBING_CAN_NOT_GET_INFO);
+        }
+
         // 保存一条查询信息的记录，防止覆盖了正常抢票的记录
         TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
         ticketInfoEntity.setUsername(username);
@@ -191,5 +200,12 @@ public class OrderController {
             ticketInfoRepository.save(ticketInfoEntity);
             return ResultUtils.error(ResultEnum.QUERY_LEFT_TICKET_INFO_FAILED);
         }
+    }
+
+    private boolean checkGrabbing(String username, String password) {
+        if (ticketInfoRepository.findTopByStateAndUsername(TicketStateEnum.GRABBING.getCode(), username) != null) {
+            return true;
+        }
+        return false;
     }
 }

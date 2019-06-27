@@ -45,7 +45,7 @@ public class OrderRunnable implements Runnable {
         }
 
         // 如果当前该用户已经在抢票了，不允许开线程
-        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoEntity.getUsername()).get();
+        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoEntity.getUsername());
         if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
             // 已经在抢票中了，不允许再次抢票
             log.error("{}", ResultEnum.ALREADY_GRABBING.getMessage());
@@ -71,18 +71,20 @@ public class OrderRunnable implements Runnable {
             ticketInfoRepository.save(ticketInfoEntity);
         } catch (Exception e) {
 
+            // 抢票失败
+            if (e instanceof Order12306Exception) {
+                Order12306Exception order12306Exception = (Order12306Exception) e;
+                if (order12306Exception.getCode().intValue() == TicketStateEnum.STOP_BY_HAND.getCode()) {
+                    // 如果是手动关闭的话，就不用再发送邮件和更新错误日志了
+                    return;
+                }
+            }
+
             // 如果填写了邮箱的话，就发送通知邮件
             if (!StringUtils.isEmpty(ticketInfoEntity.getEmail())) {
                 EmailUtils.sendFailedEmail(mailSender, ticketInfoEntity, e);
             }
 
-            // 抢票失败
-            if (e instanceof Order12306Exception) {
-                Order12306Exception order12306Exception = (Order12306Exception) e;
-                if (order12306Exception.getCode().intValue() == TicketStateEnum.STOP_BY_HAND.getCode()) {
-                    return;
-                }
-            }
             ticketInfoEntity.setState(TicketStateEnum.FAILED.getCode());
             ExceptionUtils.setFaileReason(ticketInfoEntity, e);
             ticketInfoRepository.save(ticketInfoEntity);

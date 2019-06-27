@@ -20,7 +20,6 @@ public class TicketInfoEntity extends BaseEntity {
     /**
      * 哪天出发，例如2019-04-26
      */
-    @Column
     private String trainDate;
 
     /**

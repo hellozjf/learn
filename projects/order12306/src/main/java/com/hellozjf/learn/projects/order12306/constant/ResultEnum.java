@@ -32,6 +32,7 @@ public enum ResultEnum implements CodeEnum {
     QUERY_TICKET_PEOPLE_INFO_FAILED(20, "查询乘车人信息失败"),
     QUERY_LEFT_TICKET_INFO_FAILED(21, "查询余票信息失败"),
     GRABBING_STOPED_BY_HAND(22, "抢票已被手动停止"),
+    ALREADY_GRABBING_CAN_NOT_GET_INFO(23, "已经在抢票中了，无法再获取信息"),
     ;
 
     Integer code;

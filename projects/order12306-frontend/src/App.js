@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, DatePicker, Form, Input, Select, message, Table} from 'antd';
+import {Button, DatePicker, Form, Input, Select, message, Table, notification} from 'antd';
 import axios from "axios";
 import './App.css';
 
@@ -11,6 +11,8 @@ class GrabTicketForm extends React.Component {
     ticketPeopleList: [],
     leftTicketList: [],
   };
+
+  baseUrl = "http://vultr.hellozjf.com:12307";
 
   columns = [
     {
@@ -67,7 +69,7 @@ class GrabTicketForm extends React.Component {
     axios({
       url: '/order/grabbing',
       method: 'post',
-      baseURL: 'http://127.0.0.1:12307',
+      baseURL: this.baseUrl,
       timeout: 10000,
       params: {
         trainDate: formInfo.trainDate.format("YYYY-MM-DD"),
@@ -99,7 +101,7 @@ class GrabTicketForm extends React.Component {
     axios({
       url: '/order/queryTicketPeopleList',
       method: 'get',
-      baseURL: 'http://127.0.0.1:12307',
+      baseURL: this.baseUrl,
       timeout: 10000,
       params: {
         username: formInfo.username,
@@ -127,7 +129,7 @@ class GrabTicketForm extends React.Component {
     axios({
       url: '/order/queryLeftTicketList',
       method: 'get',
-      baseURL: 'http://127.0.0.1:12307',
+      baseURL: this.baseUrl,
       timeout: 10000,
       params: {
         username: formInfo.username,
@@ -259,6 +261,9 @@ class GrabTicketForm extends React.Component {
           <Button htmlType="button" onClick={this.queryState}>
             获取抢票状态
           </Button>
+          <Button htmlType="button" onClick={this.stopGrabbing}>
+            手动停止抢票
+          </Button>
         </Form.Item>
         <Table columns={this.columns} rowKey={record => record.stationTrain} dataSource={this.state.leftTicketList}/>
       </Form>
@@ -272,7 +277,7 @@ class GrabTicketForm extends React.Component {
     axios({
       url: '/order/queryState',
       method: 'get',
-      baseURL: 'http://127.0.0.1:12307',
+      baseURL: this.baseUrl,
       timeout: 10000,
       params: {
         username: formInfo.username,
@@ -280,10 +285,32 @@ class GrabTicketForm extends React.Component {
     }).then((response) => {
       console.debug(response);
       if (response.status == 200 && response.data.code == 0) {
-        notification.open({
-          message: '抢票状态',
-          description: `当前抢票状态为${response.data.data.stateString}`,
-        });
+        message.info(`当前抢票状态为${response.data.data.stateString}`)
+      } else {
+        console.error(`failed status=${response.status} code=${response.data.code}`);
+        message.error('获取抢票状态失败');
+      }
+    }).catch((error) => {
+      message.error(error);
+    });
+  };
+
+  stopGrabbing = () => {
+
+    let formInfo = this.props.form.getFieldsValue();
+    console.debug(formInfo);
+    axios({
+      url: '/order/stopGrabbing',
+      method: 'post',
+      baseURL: this.baseUrl,
+      timeout: 10000,
+      params: {
+        username: formInfo.username,
+      }
+    }).then((response) => {
+      console.debug(response);
+      if (response.status == 200 && response.data.code == 0) {
+        message.success('停止抢票成功');
       } else {
         console.error(`failed status=${response.status} code=${response.data.code}`);
         message.error('获取抢票状态失败');

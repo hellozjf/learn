@@ -9,11 +9,13 @@ import com.hellozjf.learn.projects.order12306.constant.ResultEnum;
 import com.hellozjf.learn.projects.order12306.constant.TicketStateEnum;
 import com.hellozjf.learn.projects.order12306.custom.FileCookieStore;
 import com.hellozjf.learn.projects.order12306.domain.TicketInfoEntity;
+import com.hellozjf.learn.projects.order12306.domain.WrongCheckEntity;
 import com.hellozjf.learn.projects.order12306.dto.NormalPassengerDTO;
 import com.hellozjf.learn.projects.order12306.dto.ResultDTO;
 import com.hellozjf.learn.projects.order12306.dto.TicketInfoDTO;
 import com.hellozjf.learn.projects.order12306.exception.Order12306Exception;
 import com.hellozjf.learn.projects.order12306.repository.TicketInfoRepository;
+import com.hellozjf.learn.projects.order12306.repository.WrongCheckRepository;
 import com.hellozjf.learn.projects.order12306.service.Client12306Service;
 import com.hellozjf.learn.projects.order12306.util.HttpClientUtils;
 import com.hellozjf.learn.projects.order12306.util.RegexUtils;
@@ -33,7 +35,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -59,6 +60,9 @@ public class Client12306ServiceImpl implements Client12306Service {
 
     @Autowired
     private TicketInfoRepository ticketInfoRepository;
+
+    @Autowired
+    private WrongCheckRepository wrongCheckRepository;
 
     @Autowired
     @Qualifier("mapSeatConf")
@@ -185,7 +189,19 @@ public class Client12306ServiceImpl implements Client12306Service {
             passportWebAuthUamtkStatic(httpClient);
             String image = passportCaptchaCaptchaImage64(httpClient);
             String check = getCheck(httpClient, image);
-            passportCaptchaCaptchaCheck(httpClient, check);
+            try {
+                passportCaptchaCaptchaCheck(httpClient, check);
+            } catch (Order12306Exception e) {
+                if (e.getCode().intValue() == ResultEnum.PASSPORT_CAPTCHA_CAPTCHA_IMAGE64_ERROR.getCode().intValue()) {
+                    log.error("image = {}", image);
+                    log.error("wrong check = {}", check);
+                    WrongCheckEntity wrongCheckEntity = new WrongCheckEntity();
+                    wrongCheckEntity.setImage(image);
+                    wrongCheckEntity.setCode(check);
+                    wrongCheckRepository.save(wrongCheckEntity);
+                }
+                throw e;
+            }
             passportWebLogin(httpClient, username, password, check);
             otnLoginUserLogin(httpClient);
             newapptk = passportWebAuthUamtk(httpClient);
@@ -380,7 +396,7 @@ public class Client12306ServiceImpl implements Client12306Service {
             httppost.setEntity(entity);
 
             // 把尝试登陆的次数+1，再存回数据库中
-            TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username).get();
+            TicketInfoEntity ticketInfoEntity = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(username);
             ticketInfoEntity.setTryLoginTimes(ticketInfoEntity.getTryLoginTimes() + 1);
             ticketInfoRepository.save(ticketInfoEntity);
 
@@ -618,7 +634,7 @@ public class Client12306ServiceImpl implements Client12306Service {
         while (true) {
             ArrayNode arrayNode = otnLeftTicketQuery(closeableHttpClient, leftTicketQueryUrl, trainDate, fromStationCode, toStationCode);
             String secret = getWantedTicketSecret(ticketInfoEntity, arrayNode, mapSeatConf);
-            ticketInfoEntity = ticketInfoRepository.findByStateAndUsername(TicketStateEnum.GRABBING.getCode(), ticketInfoEntity.getUsername()).get();
+            ticketInfoEntity = ticketInfoRepository.findTopByStateAndUsername(TicketStateEnum.GRABBING.getCode(), ticketInfoEntity.getUsername());
             if (ticketInfoEntity == null) {
                 // 说明抢票被终止了，那就返回空字符串表示异常
                 throw new Order12306Exception(ResultEnum.GRABBING_STOPED_BY_HAND);
