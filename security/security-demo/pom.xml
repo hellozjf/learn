@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>security</artifactId>
+        <groupId>com.hellozjf.learn</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.hellozjf.learn.security</groupId>
+    <artifactId>security-demo</artifactId>
+    <version>1.0.0</version>
+
+    <dependencies>
+        <!--引入我自己封装的通用代码包-->
+        <dependency>
+            <groupId>com.hellozjf.learn.projects</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hellozjf.learn.security</groupId>
+            <artifactId>security-browser</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
+
+</project>

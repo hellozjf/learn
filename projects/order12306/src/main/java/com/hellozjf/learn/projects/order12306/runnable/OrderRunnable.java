@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * 购票线程体
  *
@@ -38,56 +40,66 @@ public class OrderRunnable implements Runnable {
     @Override
     public void run() {
 
-        // 如果传入的ticketInfoEntity为空，不允许开线程
-        if (ticketInfoEntity == null) {
-            log.error("ticketInfoEntity == null");
-            return;
-        }
-
-        // 如果当前该用户已经在抢票了，不允许开线程
-        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoEntity.getUsername());
-        if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
-            // 已经在抢票中了，不允许再次抢票
-            log.error("{}", ResultEnum.ALREADY_GRABBING.getMessage());
-            return;
-        }
-
-        // 如果id为空，则数据库中添加一条记录，开始抢票状态
-        // 如果id不为空，则更新数据库中的记录，恢复抢票状态
-        ticketInfoEntity.setState(TicketStateEnum.GRABBING.getCode());
-        ticketInfoEntity = ticketInfoRepository.save(ticketInfoEntity);
-
-        try {
-            // 抢票
-            String orderId = client12306Service.order(ticketInfoEntity);
-
-            // 如果填写了邮箱的话，就发送通知邮件
-            if (!StringUtils.isEmpty(ticketInfoEntity.getEmail())) {
-                EmailUtils.sendSuccessEmail(mailSender, orderId, ticketInfoEntity);
+        while (true) {
+            // 如果传入的ticketInfoEntity为空，不允许开线程
+            if (ticketInfoEntity == null) {
+                log.error("ticketInfoEntity == null");
+                return;
             }
 
-            // 抢票成功
-            ticketInfoEntity.setState(TicketStateEnum.SUCCESS.getCode());
-            ticketInfoRepository.save(ticketInfoEntity);
-        } catch (Exception e) {
+            // 如果当前该用户已经在抢票了，不允许开线程
+            TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoEntity.getUsername());
+            if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
+                // 已经在抢票中了，不允许再次抢票
+                log.error("{}", ResultEnum.ALREADY_GRABBING.getMessage());
+                return;
+            }
 
-            // 抢票失败
-            if (e instanceof Order12306Exception) {
-                Order12306Exception order12306Exception = (Order12306Exception) e;
-                if (order12306Exception.getCode().intValue() == TicketStateEnum.STOP_BY_HAND.getCode()) {
-                    // 如果是手动关闭的话，就不用再发送邮件和更新错误日志了
-                    return;
+            // 如果id为空，则数据库中添加一条记录，开始抢票状态
+            // 如果id不为空，则更新数据库中的记录，恢复抢票状态
+            ticketInfoEntity.setState(TicketStateEnum.GRABBING.getCode());
+            ticketInfoEntity = ticketInfoRepository.save(ticketInfoEntity);
+
+            try {
+                // 抢票
+                String orderId = client12306Service.order(ticketInfoEntity);
+
+                // 如果填写了邮箱的话，就发送通知邮件
+                if (!StringUtils.isEmpty(ticketInfoEntity.getEmail())) {
+                    EmailUtils.sendSuccessEmail(mailSender, orderId, ticketInfoEntity);
+                }
+
+                // 抢票成功
+                ticketInfoEntity.setState(TicketStateEnum.SUCCESS.getCode());
+                ticketInfoRepository.save(ticketInfoEntity);
+                break;
+            } catch (Exception e) {
+
+                // 抢票失败
+                if (e instanceof Order12306Exception) {
+                    Order12306Exception order12306Exception = (Order12306Exception) e;
+                    if (order12306Exception.getCode().intValue() == TicketStateEnum.STOP_BY_HAND.getCode()) {
+                        // 如果是手动关闭的话，就不用再发送邮件和更新错误日志了
+                        return;
+                    }
+                }
+
+                // 如果填写了邮箱的话，就发送通知邮件
+                if (!StringUtils.isEmpty(ticketInfoEntity.getEmail())) {
+                    EmailUtils.sendFailedEmail(mailSender, ticketInfoEntity, e);
+                }
+
+                ticketInfoEntity.setState(TicketStateEnum.FAILED.getCode());
+                ExceptionUtils.setFaileReason(ticketInfoEntity, e);
+                ticketInfoRepository.save(ticketInfoEntity);
+
+                // 发生异常了，关五分钟小黑屋
+                try {
+                    TimeUnit.MINUTES.sleep(5);
+                } catch (InterruptedException e1) {
+                    log.error("e1 = {}", e1);
                 }
             }
-
-            // 如果填写了邮箱的话，就发送通知邮件
-            if (!StringUtils.isEmpty(ticketInfoEntity.getEmail())) {
-                EmailUtils.sendFailedEmail(mailSender, ticketInfoEntity, e);
-            }
-
-            ticketInfoEntity.setState(TicketStateEnum.FAILED.getCode());
-            ExceptionUtils.setFaileReason(ticketInfoEntity, e);
-            ticketInfoRepository.save(ticketInfoEntity);
         }
     }
 
