@@ -31,6 +31,33 @@ public class SpringbootApplicationTest {
     }
 
     @Test
+    public void calcFast() {
+        int moneyInc = 512;
+        int lumberInc = 0;
+        int currentMoney = 0;
+        int currentLumber = 0;
+        int seconds = 0;
+
+        for (int i = 0; i < 60 * 10; i++) {
+            currentMoney += moneyInc;
+            currentLumber += lumberInc;
+            seconds++;
+
+            if (currentMoney > 18000) {
+                currentMoney -= 18000;
+                lumberInc += 10;
+            }
+            if (currentLumber > 3200) {
+                currentLumber -= 3200;
+                moneyInc += 128;
+            }
+        }
+
+        log.debug("moneyInc={}, lumberInc={}, currentMoney={}, currentLumber={}, seconds={}",
+                moneyInc, lumberInc, currentMoney, currentLumber, seconds);
+    }
+
+    @Test
     public void invokeJS() {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("js");
