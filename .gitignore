@@ -37,3 +37,9 @@ HELP.md
 /projects/score-system-frontend/yarn.lock
 /cookie/
 /projects/order12306-frontend/yarn.lock
+/test.tsv
+/sentences.txt
+/badSentences.txt
+/company/zrar/test-bad-language-model/output.txt
+/company/zrar/test-bad-language-model/output.tsv
+/company/zrar/test-bad-language-model/logs/
