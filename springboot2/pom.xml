@@ -86,6 +86,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!--这句话能够将scope为system的包打进jar包中，参考https://blog.csdn.net/lz619719265/article/details/82352562-->
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.spotify</groupId>

@@ -1,6 +1,8 @@
 package com.hellozjf.learn.springboot2;
 
+import com.hellozjf.learn.springboot2.config.CustomConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -21,6 +23,9 @@ public class SpringbootApplication implements CommandLineRunner {
                 .run(args);
     }
 
+    @Autowired
+    private CustomConfig customConfig;
+
     /**
      * springboot启动完会回调的函数
      * @param args
@@ -28,6 +33,6 @@ public class SpringbootApplication implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
-
+        log.debug("hello = {}", customConfig.getHello());
     }
 }
