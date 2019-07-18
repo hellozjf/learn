@@ -7,4 +7,4 @@ ADD target/${JAR_FILE}  /app/app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/bin/java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["/usr/bin/java", "-jar", "/app/app.jar", "--spring.config.location=/app/application.properties"]

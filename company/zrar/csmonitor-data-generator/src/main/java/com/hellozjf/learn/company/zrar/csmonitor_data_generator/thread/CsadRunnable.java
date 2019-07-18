@@ -8,6 +8,7 @@ import com.hellozjf.learn.company.zrar.csmonitor_data_generator.util.SleepUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -118,7 +119,25 @@ public class CsadRunnable implements Runnable {
                                 servicelogKey.setClientid(clientId);
                                 servicelogKey.setServicetime(servicetime);
                                 servicelog.setKey(servicelogKey);
-                                servicelog.setClientInfo("{\"phone\":\"\"}");
+                                // 来源五等分
+                                int clientInfo = random.nextInt(5);
+                                switch (clientInfo) {
+                                    case 0:
+                                        servicelog.setClientInfo("{\"source\":\"WEB\"}");
+                                        break;
+                                    case 1:
+                                        servicelog.setClientInfo("{\"source\":\"wap\"}");
+                                        break;
+                                    case 2:
+                                        servicelog.setClientInfo("{\"source\":\"ios\"}");
+                                        break;
+                                    case 3:
+                                        servicelog.setClientInfo("{\"source\":\"android\"}");
+                                        break;
+                                    case 4:
+                                        servicelog.setClientInfo("{\"source\":\"miniprogram\"}");
+                                        break;
+                                }
                                 servicelog.setEndtype(1);
                                 servicelog.setServiceEndtime(System.currentTimeMillis());
                                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -127,6 +146,17 @@ public class CsadRunnable implements Runnable {
                                 servicelog.setServiceId(String.valueOf(System.currentTimeMillis()));
                                 log.debug("{} servicelog: {}", csadid, servicelog);
                                 servicelogRepository.save(servicelog);
+
+                                // 有10%的概率是会话转移
+                                int sessionTransfer = random.nextInt(10);
+                                if (sessionTransfer == 0) {
+                                    Servicelog servicelogTransfer = new Servicelog();
+                                    BeanUtils.copyProperties(servicelog, servicelogTransfer);
+                                    servicelogTransfer.getKey().setServicetime(System.currentTimeMillis());
+                                    servicelogTransfer.setEndtype(4);
+                                    log.debug("{} servicelogTransfer: {}", csadid, servicelog);
+                                    servicelogRepository.save(servicelogTransfer);
+                                }
 
                                 if (willAnswerSurvey()) {
                                     // 如果会答复满意率调查表，则插入满意率调查结果
