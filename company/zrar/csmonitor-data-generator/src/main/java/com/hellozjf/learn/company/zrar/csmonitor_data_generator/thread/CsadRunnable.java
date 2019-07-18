@@ -25,7 +25,6 @@ public class CsadRunnable implements Runnable {
 
     private String csadid;
     private CsadstateRepository csadstateRepository;
-    private MessagetempRepository messagetempRepository;
     private ServicelogRepository servicelogRepository;
     private CustomserviceRepository customserviceRepository;
     private CacsiresultRepository cacsiresultRepository;
@@ -214,15 +213,18 @@ public class CsadRunnable implements Runnable {
 
     private Integer getMsgType() {
         int rand = random.nextInt(10);
-        if (rand < 6) {
-            // 6/10概率是文本消息
+        if (rand < 5) {
+            // 5/10概率是文本消息
             return 1;
-        } else if (rand < 9) {
+        } else if (rand < 8) {
             // 3/10概率是图片消息
             return 2;
-        } else {
+        } else if (rand < 9) {
             // 1/10概率是视频消息
             return 3;
+        } else {
+            // 1/10概率是音频消息
+            return 4;
         }
     }
 
