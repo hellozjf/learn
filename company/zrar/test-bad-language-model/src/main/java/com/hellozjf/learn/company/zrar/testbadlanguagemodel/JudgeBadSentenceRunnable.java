@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -43,9 +44,7 @@ public class JudgeBadSentenceRunnable implements Runnable {
         this.printWriter = printWriter;
     }
 
-    @Override
-    public void run() {
-
+    private void old() {
         // 最多尝试10次
         boolean bSuccess = false;
         for (int i = 0; i < 10; i++) {
@@ -112,6 +111,45 @@ public class JudgeBadSentenceRunnable implements Runnable {
 
         if (!bSuccess) {
             log.error("lineNum = {}, sentence = {}, 解析失败", lineNum, sentence);
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            URI uri = new URIBuilder()
+                    .setScheme("http")
+                    .setHost("localhost")
+                    .setPort(8081)
+                    .setPath("/dirtyWord/predict")
+                    .build();
+            HttpPost httpPost = new HttpPost(uri);
+            StringEntity stringEntity = new StringEntity(sentence, ContentType.APPLICATION_JSON);
+            httpPost.setEntity(stringEntity);
+            HttpResponse response = httpClient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            String result = EntityUtils.toString(entity);
+            if (StringUtils.isEmpty(result)) {
+                log.error("sentence {}, result is empty", sentence);
+            }
+
+            // 解析结果
+            JsonNode jsonNode = objectMapper.readTree(result);
+            ArrayNode data = (ArrayNode) jsonNode.get("data");
+            double probability = data.get("probability").doubleValue();
+            double notDirty = 1 - probability;
+            double dirty = probability;
+            String s = String.format("lineNum = %d, sentence = %s, not = %f, is = %f", lineNum, sentence, notDirty, dirty);
+            log.debug(s);
+
+            // 把非脏话概率小于0.5的句子保存到脏话文本中
+            printWriter.println("lineNum\tsentence\tnot\tis");
+            if (notDirty < 0.5) {
+                s = String.format("%d\t%s\t%f\t%f", lineNum, sentence, notDirty, dirty);
+                printWriter.println(s);
+            }
+        } catch (Exception e) {
+            log.error("e = {}", e);
         }
     }
 }
