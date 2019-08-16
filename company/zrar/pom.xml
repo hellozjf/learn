@@ -16,6 +16,7 @@
         <module>csmonitor-data-generator</module>
         <module>mleap-bridge</module>
         <module>test-bad-language-model</module>
+        <module>ardb-press</module>
     </modules>
 
 
