@@ -83,4 +83,19 @@ public class NormalPassengerDTO {
 
     @JsonProperty("gat_version")
     private String gatVersion;
+
+    @JsonProperty("allEncStr")
+    private String allEncStr;
+
+    @JsonProperty("isAdult")
+    private String isAdult;
+
+    @JsonProperty("isYongThan10")
+    private String isYongThan10;
+
+    @JsonProperty("isYongThan14")
+    private String isYongThan14;
+
+    @JsonProperty("isOldThan60")
+    private String isOldThan60;
 }
