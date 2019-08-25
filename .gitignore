@@ -37,6 +37,7 @@ HELP.md
 /projects/score-system-frontend/yarn.lock
 /cookie/
 /projects/order12306-frontend/yarn.lock
+/node_modules/
 /test.tsv
 /sentences.txt
 /badSentences.txt

@@ -18,6 +18,7 @@
         <module>mock-backend</module>
         <module>score-system</module>
         <module>common</module>
+        <module>robot</module>
         <module>tensorflow-java</module>
     </modules>
 

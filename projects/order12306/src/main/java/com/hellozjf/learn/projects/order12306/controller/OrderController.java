@@ -63,9 +63,24 @@ public class OrderController {
             log.error("{}", errMsg);
             return ResultUtils.error(ResultEnum.FORM_ERROR.getCode(), field + errMsg);
         }
-        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoForm.getUsername());
-        if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
-            // 已经在抢票中了，不允许再次抢票
+//        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoForm.getUsername());
+//        if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
+//            // 已经在抢票中了，不允许再次抢票
+//            return ResultUtils.error(ResultEnum.ALREADY_GRABBING);
+//        }
+
+        TicketInfoEntity see = ticketInfoRepository.findByStateAndUsernameAndTrainDateAndStationTrainAndFromStationAndToStationAndSeatTypeAndTicketPeople(
+                TicketStateEnum.GRABBING.getCode(),
+                ticketInfoForm.getUsername(),
+                ticketInfoForm.getTrainDate(),
+                ticketInfoForm.getStationTrain(),
+                ticketInfoForm.getFromStation(),
+                ticketInfoForm.getToStation(),
+                ticketInfoForm.getSeatType(),
+                ticketInfoForm.getTicketPeople()
+        );
+        if (see != null) {
+            // 表示这种票已经在抢票中了，不允许再次抢票
             return ResultUtils.error(ResultEnum.ALREADY_GRABBING);
         }
 
@@ -79,6 +94,7 @@ public class OrderController {
 
     /**
      * 查询购票状态
+     * todo 这里应该查出来很多个购票状态
      * @param username
      * @return
      */
@@ -97,6 +113,7 @@ public class OrderController {
 
     /**
      * 停止抢票
+     * todo 这里应该根据一个id来停止，因为一个人可能同时会购买很多张票
      * @param username
      * @return
      */
@@ -121,34 +138,36 @@ public class OrderController {
     public ResultVO queryTicketPeopleList(String username, String password) throws IOException, URISyntaxException {
 
         // 查询前先要判断当前有没有在抢票，如果在抢票中，不允许获取乘客订单，否则抢票的账号会被下线的
-        if (checkGrabbing(username, password)) {
-            return ResultUtils.error(ResultEnum.ALREADY_GRABBING_CAN_NOT_GET_INFO);
-        }
+//        if (checkGrabbing(username, password)) {
+//            return ResultUtils.error(ResultEnum.ALREADY_GRABBING_CAN_NOT_GET_INFO);
+//        }
 
-        TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
-        ticketInfoEntity.setUsername(username);
-        ticketInfoEntity.setPassword(password);
-        ticketInfoEntity.setTryLoginTimes(0);
-        ticketInfoEntity.setTryLeftTicketTimes(0);
-        ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO.getCode());
+        synchronized (username) {
+            TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
+            ticketInfoEntity.setUsername(username);
+            ticketInfoEntity.setPassword(password);
+            ticketInfoEntity.setTryLoginTimes(0);
+            ticketInfoEntity.setTryLeftTicketTimes(0);
+            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO.getCode());
 
-        try {
-            // 保存一条查询信息的记录，防止覆盖了正常抢票的记录
-            ticketInfoEntity = ticketInfoRepository.save(ticketInfoEntity);
+            try {
+                // 保存一条查询信息的记录，防止覆盖了正常抢票的记录
+                ticketInfoEntity = ticketInfoRepository.save(ticketInfoEntity);
 
-            CloseableHttpClient httpClient = client12306Service.login(username, password);
-            List<NormalPassengerDTO> normalPassengerDTOList = client12306Service.queryTicketPeopleList(httpClient);
+                CloseableHttpClient httpClient = client12306Service.login(username, password);
+                List<NormalPassengerDTO> normalPassengerDTOList = client12306Service.queryTicketPeopleList(httpClient);
 
-            // 查询信息成功
-            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_SUCCESS.getCode());
-            ticketInfoRepository.save(ticketInfoEntity);
-            return ResultUtils.success(normalPassengerDTOList);
-        } catch (Exception e) {
-            // 查询信息失败
-            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_FAILED.getCode());
-            ExceptionUtils.setFaileReason(ticketInfoEntity, e);
-            ticketInfoRepository.save(ticketInfoEntity);
-            return ResultUtils.error(ResultEnum.QUERY_TICKET_PEOPLE_INFO_FAILED);
+                // 查询信息成功
+                ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_SUCCESS.getCode());
+                ticketInfoRepository.save(ticketInfoEntity);
+                return ResultUtils.success(normalPassengerDTOList);
+            } catch (Exception e) {
+                // 查询信息失败
+                ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_FAILED.getCode());
+                ExceptionUtils.setFaileReason(ticketInfoEntity, e);
+                ticketInfoRepository.save(ticketInfoEntity);
+                return ResultUtils.error(ResultEnum.QUERY_TICKET_PEOPLE_INFO_FAILED);
+            }
         }
     }
 
@@ -171,34 +190,36 @@ public class OrderController {
                        String toStation) throws IOException, URISyntaxException {
 
         // 查询前先要判断当前有没有在抢票，如果在抢票中，不允许获取乘客订单，否则抢票的账号会被下线的
-        if (checkGrabbing(username, password)) {
-            return ResultUtils.error(ResultEnum.ALREADY_GRABBING_CAN_NOT_GET_INFO);
-        }
+//        if (checkGrabbing(username, password)) {
+//            return ResultUtils.error(ResultEnum.ALREADY_GRABBING_CAN_NOT_GET_INFO);
+//        }
 
-        // 保存一条查询信息的记录，防止覆盖了正常抢票的记录
-        TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
-        ticketInfoEntity.setUsername(username);
-        ticketInfoEntity.setPassword(password);
-        ticketInfoEntity.setTryLoginTimes(0);
-        ticketInfoEntity.setTryLeftTicketTimes(0);
-        ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO.getCode());
+        synchronized (username) {
+            // 保存一条查询信息的记录，防止覆盖了正常抢票的记录
+            TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
+            ticketInfoEntity.setUsername(username);
+            ticketInfoEntity.setPassword(password);
+            ticketInfoEntity.setTryLoginTimes(0);
+            ticketInfoEntity.setTryLeftTicketTimes(0);
+            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO.getCode());
 
-        try {
-            ticketInfoRepository.save(ticketInfoEntity);
+            try {
+                ticketInfoRepository.save(ticketInfoEntity);
 
-            CloseableHttpClient httpClient = client12306Service.login(username, password);
-            List<TicketInfoDTO> ticketInfoDTOList = client12306Service.queryLeftTicketList(httpClient, trainDate, fromStation, toStation);
+                CloseableHttpClient httpClient = client12306Service.login(username, password);
+                List<TicketInfoDTO> ticketInfoDTOList = client12306Service.queryLeftTicketList(httpClient, trainDate, fromStation, toStation);
 
-            // 查询信息成功
-            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_SUCCESS.getCode());
-            ticketInfoRepository.save(ticketInfoEntity);
-            return ResultUtils.success(ticketInfoDTOList);
-        } catch (Exception e) {
-            // 查询信息失败
-            ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_FAILED.getCode());
-            ExceptionUtils.setFaileReason(ticketInfoEntity, e);
-            ticketInfoRepository.save(ticketInfoEntity);
-            return ResultUtils.error(ResultEnum.QUERY_LEFT_TICKET_INFO_FAILED);
+                // 查询信息成功
+                ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_SUCCESS.getCode());
+                ticketInfoRepository.save(ticketInfoEntity);
+                return ResultUtils.success(ticketInfoDTOList);
+            } catch (Exception e) {
+                // 查询信息失败
+                ticketInfoEntity.setState(TicketStateEnum.QUERY_INFO_FAILED.getCode());
+                ExceptionUtils.setFaileReason(ticketInfoEntity, e);
+                ticketInfoRepository.save(ticketInfoEntity);
+                return ResultUtils.error(ResultEnum.QUERY_LEFT_TICKET_INFO_FAILED);
+            }
         }
     }
 

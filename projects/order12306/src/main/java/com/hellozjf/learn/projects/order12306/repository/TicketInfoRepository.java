@@ -13,4 +13,14 @@ public interface TicketInfoRepository extends JpaRepository<TicketInfoEntity, St
     List<TicketInfoEntity> findByState(Integer state);
     TicketInfoEntity findTopByUsernameOrderByGmtCreateDesc(String username);
     TicketInfoEntity findTopByStateAndUsername(Integer state, String username);
+    TicketInfoEntity findByStateAndUsernameAndTrainDateAndStationTrainAndFromStationAndToStationAndSeatTypeAndTicketPeople(
+            Integer state,
+            String username,
+            String trainDate,
+            String stationTrain,
+            String fromStation,
+            String toStation,
+            String seatType,
+            String ticketPeople
+    );
 }

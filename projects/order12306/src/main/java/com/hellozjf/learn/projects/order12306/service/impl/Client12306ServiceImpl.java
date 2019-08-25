@@ -153,7 +153,11 @@ public class Client12306ServiceImpl implements Client12306Service {
         Map<String, String> nameCodeMap = otnResourcesJsFrameworkStationName(httpClient, stationVersionUrl);
         log.debug("nameCodeMap = {}", nameCodeMap);
         otnPasscodeNewGetPassCodeNew(httpClient);
-        String secret = queryTicket(httpClient, leftTicketQueryUrl, nameCodeMap, ticketInfoEntity, mapSeatConf);
+        String secret = queryTicketNoBlock(httpClient, leftTicketQueryUrl, nameCodeMap, ticketInfoEntity, mapSeatConf);
+        if (StringUtils.isEmpty(secret)) {
+            // 当前无票，返回null
+            return null;
+        }
 
         otnLoginCheckUser(httpClient);
         otnLeftTicketSubmitOrderRequest(httpClient, secret, ticketInfoEntity);
@@ -283,7 +287,8 @@ public class Client12306ServiceImpl implements Client12306Service {
 
         CloseableHttpResponse response = httpClient.execute(httppost);
         String responseString = HttpClientUtils.getResponse(response);
-        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>(){});
+        ResultDTO resultDTO = objectMapper.readValue(responseString, new TypeReference<ResultDTO>() {
+        });
         return resultDTO.getNewapptk();
     }
 
@@ -627,6 +632,45 @@ public class Client12306ServiceImpl implements Client12306Service {
         return null;
     }
 
+    /**
+     * 查询车票立马返回，如果无票就返回空字符串
+     * @param closeableHttpClient
+     * @param leftTicketQueryUrl
+     * @param nameCodeMap
+     * @param ticketInfoEntity
+     * @param mapSeatConf
+     * @return
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    private String queryTicketNoBlock(CloseableHttpClient closeableHttpClient, String leftTicketQueryUrl, Map<String, String> nameCodeMap, TicketInfoEntity ticketInfoEntity, Map<String, Integer> mapSeatConf) throws IOException, URISyntaxException {
+        String trainDate = ticketInfoEntity.getTrainDate();
+        String fromStationCode = nameCodeMap.get(ticketInfoEntity.getFromStation());
+        String toStationCode = nameCodeMap.get(ticketInfoEntity.getToStation());
+        ArrayNode arrayNode = otnLeftTicketQuery(closeableHttpClient, leftTicketQueryUrl, trainDate, fromStationCode, toStationCode);
+        String secret = getWantedTicketSecret(ticketInfoEntity, arrayNode, mapSeatConf);
+        ticketInfoEntity = ticketInfoRepository.findTopByStateAndUsername(TicketStateEnum.GRABBING.getCode(), ticketInfoEntity.getUsername());
+        if (ticketInfoEntity == null) {
+            // 说明抢票被终止了，那就返回空字符串表示异常
+            throw new Order12306Exception(ResultEnum.GRABBING_STOPED_BY_HAND);
+        }
+        // 将查询次数写入数据库中
+        ticketInfoEntity.setTryLeftTicketTimes(ticketInfoEntity.getTryLeftTicketTimes() + 1);
+        ticketInfoRepository.save(ticketInfoEntity);
+        return secret;
+    }
+
+    /**
+     * 查询到车票才返回
+     * @param closeableHttpClient
+     * @param leftTicketQueryUrl
+     * @param nameCodeMap
+     * @param ticketInfoEntity
+     * @param mapSeatConf
+     * @return
+     * @throws IOException
+     * @throws URISyntaxException
+     */
     private String queryTicket(CloseableHttpClient closeableHttpClient, String leftTicketQueryUrl, Map<String, String> nameCodeMap, TicketInfoEntity ticketInfoEntity, Map<String, Integer> mapSeatConf) throws IOException, URISyntaxException {
         String trainDate = ticketInfoEntity.getTrainDate();
         String fromStationCode = nameCodeMap.get(ticketInfoEntity.getFromStation());
@@ -733,7 +777,8 @@ public class Client12306ServiceImpl implements Client12306Service {
                 cardType,
                 normalPassengerDTO.getPassengerIdNo(),
                 normalPassengerDTO.getMobileNo(),
-                "N");
+                "N",
+                normalPassengerDTO.getAllEncStr());
         return passengerTicketStr;
     }
 
