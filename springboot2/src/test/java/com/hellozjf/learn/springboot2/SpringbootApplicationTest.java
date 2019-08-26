@@ -1,5 +1,7 @@
 package com.hellozjf.learn.springboot2;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +18,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Jingfeng Zhou
@@ -91,5 +95,28 @@ public class SpringbootApplicationTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class ST {
+        public int a;
+        public int b;
+        public int c;
+    }
+
+    @Test
+    public void stTest() {
+        List<ST> stList = new ArrayList<>();
+        stList.add(new ST(1, 2, 3));
+        stList.add(new ST(2, 3, 4));
+        stList.add(new ST(3, 4, 5));
+        ST st = new ST(0, 0, 0);
+        stList.stream().forEach(t -> {
+            st.a += t.a;
+            st.b += t.b;
+            st.c += t.c;
+        });
+        log.debug("{}", st);
     }
 }
