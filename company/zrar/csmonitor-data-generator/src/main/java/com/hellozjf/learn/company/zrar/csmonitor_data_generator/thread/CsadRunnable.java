@@ -25,6 +25,7 @@ public class CsadRunnable implements Runnable {
 
     private String csadid;
     private CsadstateRepository csadstateRepository;
+    private MessagetempRepository messagetempRepository;
     private ServicelogRepository servicelogRepository;
     private CustomserviceRepository customserviceRepository;
     private CacsiresultRepository cacsiresultRepository;
@@ -57,9 +58,11 @@ public class CsadRunnable implements Runnable {
                             changeState(CsadStateEnum.SIGN_IN);
                             if (rand < 1) {
                                 // 1/3概率，说明是空闲状态
+                                setServiceNum(0);
                                 SleepUtils.sleep(TimeUnit.SECONDS, randTime);
                             } else {
                                 // 2/3概率，说明是应答状态
+                                setServiceNum(1);
                                 int totalTime = randTime;
                                 int startTime = 0;
                                 String sessionId = UUID.randomUUID().toString();
@@ -175,6 +178,7 @@ public class CsadRunnable implements Runnable {
                     } else if (rand < 3) {
                         // 1/4概率，说明是示忙，将坐席状态修改为示忙，然后等待1小时之后再次尝试
                         changeState(CsadStateEnum.BUSY);
+                        setServiceNum(0);
                         int currentHour = hour;
                         while (currentHour == hour) {
                             SleepUtils.sleep(TimeUnit.MINUTES, 1);
@@ -184,6 +188,7 @@ public class CsadRunnable implements Runnable {
                     } else {
                         // 1/4概率，说明是离线，将坐席状态修改为离线，然后等待1小时之后再次尝试
                         changeState(CsadStateEnum.SIGN_OUT);
+                        setServiceNum(0);
                         int currentHour = hour;
                         while (currentHour == hour) {
                             SleepUtils.sleep(TimeUnit.MINUTES, 1);
@@ -194,6 +199,7 @@ public class CsadRunnable implements Runnable {
                 } else {
                     // 说明不是工作时间，将坐席状态修改为离线，然后等待1分钟之后再次尝试
                     changeState(CsadStateEnum.SIGN_OUT);
+                    setServiceNum(0);
                     SleepUtils.sleep(TimeUnit.MINUTES, 1);
                 }
             } catch (Exception e) {
@@ -208,6 +214,12 @@ public class CsadRunnable implements Runnable {
         Csadstate csadstate = csadstateRepository.findById(csadid).orElse(null);
         csadstate.setCsadstate(csadStateEnum.getCode());
         log.debug("{} changeState: {}", csadid, csadStateEnum.getCode());
+        csadstateRepository.save(csadstate);
+    }
+
+    private void setServiceNum(int serviceNum) {
+        Csadstate csadstate = csadstateRepository.findById(csadid).orElse(null);
+        csadstate.setServicenum(serviceNum);
         csadstateRepository.save(csadstate);
     }
 
