@@ -1,4 +1,4 @@
-FROM openjdk:11.0.3-jdk-stretch
+FROM openjdk:8-jre-alpine
 MAINTAINER hellozjf <908686171@qq.com>
 
 # Add the service itself

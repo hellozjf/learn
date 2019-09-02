@@ -14,7 +14,7 @@
     <version>1.0.0</version>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>8</java.version>
         <dockerfile-maven-version>1.4.6</dockerfile-maven-version>
         <docker-username>hellozjf</docker-username>
         <docker-password>Zjf@1234</docker-password>

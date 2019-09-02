@@ -4,6 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -12,9 +23,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 调用百度翻译api，实现翻译
@@ -39,7 +49,7 @@ public class TranslateService {
         int retryCount = 3;
         for (int i = 0; i < retryCount; i++) {
             try {
-                HttpClient httpClient = HttpClient.newHttpClient();
+                CloseableHttpClient httpClient = HttpClients.createDefault();
                 String urlEncodeQ = null;
                 try {
                     urlEncodeQ = URLEncoder.encode(q, "utf-8");
@@ -53,22 +63,32 @@ public class TranslateService {
                     log.error("e = {}", e);
                     return q;
                 }
-                String form = String.format("q=%s&from=%s&to=%s&appid=%s&salt=%s&sign=%s",
-                        urlEncodeQ, "en", "zh", baiduConfig.getAppid(), baiduConfig.getSalt(), md5);
-                log.debug("form = {}", form);
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("https://fanyi-api.baidu.com/api/trans/vip/translate"))
-                        .header("Content-Type", "application/x-www-form-urlencoded")
-                        .POST(HttpRequest.BodyPublishers.ofString(form))
+                URI uri = new URIBuilder()
+                        .setScheme("https")
+                        .setHost("fanyi-api.baidu.com")
+                        .setPath("/api/trans/vip/translate")
                         .build();
-                HttpResponse<String> response = null;
+                HttpPost httpPost = new HttpPost(uri);
+                List<NameValuePair> formparams = new ArrayList<>();
+                formparams.add(new BasicNameValuePair("q", urlEncodeQ));
+                formparams.add(new BasicNameValuePair("from", "en"));
+                formparams.add(new BasicNameValuePair("to", "zh"));
+                formparams.add(new BasicNameValuePair("appid", baiduConfig.getAppid()));
+                formparams.add(new BasicNameValuePair("salt", baiduConfig.getSalt()));
+                formparams.add(new BasicNameValuePair("sign", md5));
+                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+                httpPost.setEntity(entity);
+                CloseableHttpResponse response = httpClient.execute(httpPost);
+                String body = null;
                 try {
-                    response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                    HttpEntity resEntity = response.getEntity();
+                    if (resEntity != null) {
+                        body = EntityUtils.toString(resEntity);
+                    }
                 } catch (Exception e) {
                     log.error("e = {}", e);
                     return q;
                 }
-                String body = response.body();
                 JsonNode node = null;
                 try {
                     log.debug("body = {}", body);

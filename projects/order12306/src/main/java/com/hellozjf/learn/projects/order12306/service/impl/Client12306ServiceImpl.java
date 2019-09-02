@@ -623,7 +623,7 @@ public class Client12306ServiceImpl implements Client12306Service {
                         !rs[seatType].equalsIgnoreCase("") &&
                         !rs[seatType].equalsIgnoreCase("*")) {
                     // 查询到符合条件的票存入cookie
-                    String secret = URLDecoder.decode(rs[0], StandardCharsets.UTF_8);
+                    String secret = URLDecoder.decode(rs[0], "utf-8");
                     log.debug("secret = {}", secret);
                     return secret;
                 }

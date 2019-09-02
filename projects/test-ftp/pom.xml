@@ -5,7 +5,7 @@
 
     <groupId>com.hellozjf.test</groupId>
     <artifactId>test-ftp</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <packaging>jar</packaging>
 
     <name>test-ftp</name>
@@ -21,13 +21,17 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>11</java.version>
+        <java.version>8</java.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.googlejavaformat/google-java-format -->
