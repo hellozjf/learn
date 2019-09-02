@@ -9,6 +9,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -67,18 +68,15 @@ public class TranslateService {
                         .setScheme("https")
                         .setHost("fanyi-api.baidu.com")
                         .setPath("/api/trans/vip/translate")
+                        .setParameter("q", q)
+                        .setParameter("from", "en")
+                        .setParameter("to", "zh")
+                        .setParameter("appid", baiduConfig.getAppid())
+                        .setParameter("salt", baiduConfig.getSalt())
+                        .setParameter("sign", md5)
                         .build();
-                HttpPost httpPost = new HttpPost(uri);
-                List<NameValuePair> formparams = new ArrayList<>();
-                formparams.add(new BasicNameValuePair("q", urlEncodeQ));
-                formparams.add(new BasicNameValuePair("from", "en"));
-                formparams.add(new BasicNameValuePair("to", "zh"));
-                formparams.add(new BasicNameValuePair("appid", baiduConfig.getAppid()));
-                formparams.add(new BasicNameValuePair("salt", baiduConfig.getSalt()));
-                formparams.add(new BasicNameValuePair("sign", md5));
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
-                httpPost.setEntity(entity);
-                CloseableHttpResponse response = httpClient.execute(httpPost);
+                HttpGet httpGet = new HttpGet(uri);
+                CloseableHttpResponse response = httpClient.execute(httpGet);
                 String body = null;
                 try {
                     HttpEntity resEntity = response.getEntity();
