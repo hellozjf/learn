@@ -63,11 +63,6 @@ public class OrderController {
             log.error("{}", errMsg);
             return ResultUtils.error(ResultEnum.FORM_ERROR.getCode(), field + errMsg);
         }
-//        TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoForm.getUsername());
-//        if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
-//            // 已经在抢票中了，不允许再次抢票
-//            return ResultUtils.error(ResultEnum.ALREADY_GRABBING);
-//        }
 
         TicketInfoEntity see = ticketInfoRepository.findByStateAndUsernameAndTrainDateAndStationTrainAndFromStationAndToStationAndSeatTypeAndTicketPeople(
                 TicketStateEnum.GRABBING.getCode(),

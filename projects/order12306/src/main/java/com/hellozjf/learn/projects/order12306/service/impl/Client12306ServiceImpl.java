@@ -649,8 +649,8 @@ public class Client12306ServiceImpl implements Client12306Service {
         String toStationCode = nameCodeMap.get(ticketInfoEntity.getToStation());
         ArrayNode arrayNode = otnLeftTicketQuery(closeableHttpClient, leftTicketQueryUrl, trainDate, fromStationCode, toStationCode);
         String secret = getWantedTicketSecret(ticketInfoEntity, arrayNode, mapSeatConf);
-        ticketInfoEntity = ticketInfoRepository.findTopByStateAndUsername(TicketStateEnum.GRABBING.getCode(), ticketInfoEntity.getUsername());
-        if (ticketInfoEntity == null) {
+        TicketInfoEntity testTicketInfoEntity = ticketInfoRepository.findTopByStateAndUsername(TicketStateEnum.GRABBING.getCode(), ticketInfoEntity.getUsername());
+        if (testTicketInfoEntity == null) {
             // 说明抢票被终止了，那就返回空字符串表示异常
             throw new Order12306Exception(ResultEnum.GRABBING_STOPED_BY_HAND);
         }
