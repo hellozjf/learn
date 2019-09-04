@@ -1,6 +1,7 @@
 package com.hellozjf.learn.springboot2;
 
 import com.hellozjf.learn.springboot2.config.CustomConfig;
+import com.hellozjf.learn.springboot2.service.DateTimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -26,6 +27,9 @@ public class SpringbootApplication implements CommandLineRunner {
     @Autowired
     private CustomConfig customConfig;
 
+    @Autowired
+    private DateTimeService dateTimeService;
+
     /**
      * springboot启动完会回调的函数
      * @param args
@@ -34,5 +38,6 @@ public class SpringbootApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         log.debug("hello = {}", customConfig.getHello());
+        log.debug("test = {}", dateTimeService.getWeekStartTime(dateTimeService.getCurrentTime()));
     }
 }
