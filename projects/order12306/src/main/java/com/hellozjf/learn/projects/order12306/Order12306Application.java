@@ -38,9 +38,6 @@ public class Order12306Application implements CommandLineRunner {
         // 启动的时候，找到所有还在抢票的项目，然后让它们继续去抢票
         List<TicketInfoEntity> ticketInfoEntityList = ticketInfoRepository.findByState(TicketStateEnum.GRABBING.getCode());
         for (TicketInfoEntity ticketInfoEntity : ticketInfoEntityList) {
-//            // 把先前的线程标记为已停止，否则后面会认为同时开启了两条线程
-//            ticketInfoEntity.setState(TicketStateEnum.PAUSE.getCode());
-//            ticketInfoRepository.save(ticketInfoEntity);
             // 重新再开启购票线程
             executorService.execute(new OrderRunnable(ticketInfoEntity));
         }

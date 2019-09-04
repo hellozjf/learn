@@ -214,6 +214,7 @@ public class Client12306ServiceImpl implements Client12306Service {
         otnLoginUserLogin(httpClient);
         otnLoginConf(httpClient);
         otnIndexInitMy12306Api(httpClient);
+        log.info("{} 登录成功", username);
     }
 
     private void otnHttpZFGetJS(CloseableHttpClient httpClient) throws IOException, URISyntaxException {

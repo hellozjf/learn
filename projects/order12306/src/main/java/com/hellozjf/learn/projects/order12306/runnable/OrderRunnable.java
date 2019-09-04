@@ -33,6 +33,11 @@ public class OrderRunnable implements Runnable {
         ticketInfoRepository = SpringContextConfig.getBean(TicketInfoRepository.class);
         client12306Service = SpringContextConfig.getBean(Client12306Service.class);
 
+        // 打印开始抢票的信息
+        log.info("开始抢票：{} {} {} -> {} {}", ticketInfoEntity.getUsername(),
+                ticketInfoEntity.getTrainDate(), ticketInfoEntity.getFromStation(),
+                ticketInfoEntity.getToStation(), ticketInfoEntity.getStationTrain());
+
         // 把需要购票的信息存起来
         this.ticketInfoEntity = ticketInfoEntity;
     }
@@ -49,23 +54,19 @@ public class OrderRunnable implements Runnable {
 
             // 查询购票人、查询车次、抢票，这三个操作同时只允许一个发生
             synchronized (ticketInfoEntity.getUsername()) {
-                // 如果当前该用户已经在抢票了，不允许开线程
-//                TicketInfoEntity see = ticketInfoRepository.findTopByUsernameOrderByGmtCreateDesc(ticketInfoEntity.getUsername());
-//                if (see != null && see.getState().equals(TicketStateEnum.GRABBING.getCode())) {
-//                    // 已经在抢票中了，不允许再次抢票
-//                    log.error("{}", ResultEnum.ALREADY_GRABBING.getMessage());
-//                    return;
-//                }
-
-                // 如果id为空，则数据库中添加一条记录，开始抢票状态
-                // 如果id不为空，则更新数据库中的记录，恢复抢票状态
-                ticketInfoEntity.setState(TicketStateEnum.GRABBING.getCode());
-                ticketInfoEntity = ticketInfoRepository.save(ticketInfoEntity);
 
                 try {
+                    // 如果id为空，则数据库中添加一条记录，开始抢票状态
+                    // 如果id不为空，则更新数据库中的记录，恢复抢票状态
+                    ticketInfoEntity.setState(TicketStateEnum.GRABBING.getCode());
+                    ticketInfoEntity = ticketInfoRepository.save(ticketInfoEntity);
+
                     // 抢票
                     String orderId = client12306Service.order(ticketInfoEntity);
                     if (StringUtils.isEmpty(orderId)) {
+                        log.info("暂时无票：{} {} {} -> {} {}", ticketInfoEntity.getUsername(),
+                                ticketInfoEntity.getTrainDate(), ticketInfoEntity.getFromStation(),
+                                ticketInfoEntity.getToStation(), ticketInfoEntity.getStationTrain());
                         // 当前无票，过五秒钟再试
                         TimeUnit.SECONDS.sleep(5);
                         continue;
@@ -79,8 +80,13 @@ public class OrderRunnable implements Runnable {
                     // 抢票成功
                     ticketInfoEntity.setState(TicketStateEnum.SUCCESS.getCode());
                     ticketInfoRepository.save(ticketInfoEntity);
+                    log.info("抢票成功：{} {} {} -> {} {}", ticketInfoEntity.getUsername(),
+                            ticketInfoEntity.getTrainDate(), ticketInfoEntity.getFromStation(),
+                            ticketInfoEntity.getToStation(), ticketInfoEntity.getStationTrain());
                     break;
                 } catch (Exception e) {
+
+                    log.error("e = {}", e);
 
                     // 抢票失败
                     if (e instanceof Order12306Exception) {
