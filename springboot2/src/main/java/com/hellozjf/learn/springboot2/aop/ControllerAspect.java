@@ -19,6 +19,11 @@ public class ControllerAspect {
         return calcTime(invocation);
     }
 
+    @Around("execution(* org.slf4j.Logger.*(..))")
+    public Object testLoggerCost(ProceedingJoinPoint invocation) throws Throwable {
+        return calcTime(invocation);
+    }
+
     private Object calcTime(ProceedingJoinPoint invocation) throws Throwable {
         long t1 = System.currentTimeMillis();
         Object result = invocation.proceed();
