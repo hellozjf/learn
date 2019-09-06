@@ -11,7 +11,7 @@
 
     <groupId>com.hellozjf.learn.projects</groupId>
     <artifactId>order12306</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <properties>
         <java.version>8</java.version>
