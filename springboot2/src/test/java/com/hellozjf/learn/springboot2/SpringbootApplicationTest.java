@@ -1,10 +1,12 @@
 package com.hellozjf.learn.springboot2;
 
+import com.hellozjf.learn.springboot2.vo.TestVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -32,6 +34,16 @@ public class SpringbootApplicationTest {
     @Test
     public void main() {
         log.debug("hello world");
+    }
+
+    @Test
+    public void beanCopy() {
+        TestVO testVO = new TestVO();
+        testVO.setI(1);
+        testVO.setS("s");
+        TestVO testVO2 = new TestVO();
+        BeanUtils.copyProperties(testVO, testVO2);
+        log.debug("{}", testVO2);
     }
 
     @Test

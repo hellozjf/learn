@@ -38,25 +38,25 @@ public interface DateTimeService {
      * 获取基于某个时间的后一天开始时间
      * @return
      */
-    LocalDateTime getNextDayStartTime(LocalDateTime localDateTime);
+    LocalDateTime getNextDayStartTime(LocalDateTime base);
 
     /**
      * 获取基于某个时间的星期开始时间，周一
      * @return
      */
-    LocalDateTime getWeekStartTime(LocalDateTime localDateTime);
+    LocalDateTime getWeekStartTime(LocalDateTime base);
 
     /**
      * 获取基于某个时间的月开始时间
      * @return
      */
-    LocalDateTime getMonthStartTime(LocalDateTime localDateTime);
+    LocalDateTime getMonthStartTime(LocalDateTime base);
 
     /**
      * 获取基于某个时间的下月开始时间
      * @return
      */
-    LocalDateTime getNextMonthStartTime(LocalDateTime localDateTime);
+    LocalDateTime getNextMonthStartTime(LocalDateTime base);
 
 
 

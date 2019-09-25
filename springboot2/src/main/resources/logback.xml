@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <jmxConfigurator/>
+    <shutdownHook/>
+
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!-- 日志文件输出 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>D:\arbd\css-web-8.5.9\logs\ARBD.LOG</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <FileNamePattern>asr.log.%i.bak</FileNamePattern>
+            <MinIndex>1</MinIndex>
+            <MaxIndex>12</MaxIndex>
+        </rollingPolicy>
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>100MB</MaxFileSize>
+        </triggeringPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+    
+    <logger name="com.zrar.bd.asr.blh.AsrMonitorBLH" level="INFO" additivity="true">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger name="com.zrar.bd.blh.ArAsrGateBLH" level="INFO" additivity="true">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- 在这里，打印到FILE最终会打印到前面设置的日志文件输出中，打印到STDOUT最终会打印到控制台 -->
+    <!-- 另外这里additivity="true"表明，打印到文件的同时，还会打印到root指定的位置 -->
+    <logger name="com.zrar.bd.msg.blh.AsrCallBLH" level="DEBUG" additivity="true">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger name="com.zrar.bd.msg.blh.AsrMsgBLH" level="DEBUG" additivity="true">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger name="com.zrar.bd.msg.endpoint.MessageEndpoint" level="DEBUG" additivity="true">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger name="com.zrar.bd.msg.endpoint.MessageEndpointClients" level="DEBUG" additivity="true">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger name="com.zrar.bd.msg.util.SendMsg" level="DEBUG" additivity="true">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+</configuration>

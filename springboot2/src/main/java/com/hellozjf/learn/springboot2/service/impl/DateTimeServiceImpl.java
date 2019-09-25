@@ -85,7 +85,7 @@ public class DateTimeServiceImpl implements DateTimeService {
 
     @Override
     public LocalDateTime getLocalDateTime(String str, String format) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern(format);
         LocalDateTime localDateTime = LocalDateTime.parse(str, df);
         return localDateTime;
     }
