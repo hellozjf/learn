@@ -14,6 +14,8 @@ public class CustomConfig {
 
     private String arbdIp;
     private int arbdPort;
+    private String receivePath;
+    private String callPath;
     private int threadNum;
     private int minCallInterval;
     private int maxCallInterval;

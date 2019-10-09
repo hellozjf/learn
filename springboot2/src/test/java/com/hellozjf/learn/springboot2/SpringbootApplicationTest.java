@@ -1,5 +1,8 @@
 package com.hellozjf.learn.springboot2;
 
+import com.hellozjf.learn.springboot2.bo.HelloBO;
+import com.hellozjf.learn.springboot2.util.ConvertUtils;
+import com.hellozjf.learn.springboot2.vo.HelloVO;
 import com.hellozjf.learn.springboot2.vo.TestVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -21,6 +26,8 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +37,28 @@ import java.util.List;
 @SpringBootTest
 @Slf4j
 public class SpringbootApplicationTest {
+
+    private HelloBO helloBO() {
+        HelloBO helloBO = new HelloBO();
+        helloBO.setId(1L);
+        helloBO.setAge(18);
+        helloBO.setMoney(100.0);
+        helloBO.setBirthday(new Date());
+        helloBO.setName("小测");
+        return helloBO;
+    }
+
+    @Test
+    public void bo2vo() {
+        HelloVO helloVO = ConvertUtils.convert(helloBO(), HelloVO.class);
+        log.debug("{}", helloVO);
+    }
+
+    @Test
+    public void boList2voList() {
+        List<HelloVO> helloVO = ConvertUtils.convert(Arrays.asList(helloBO()), HelloVO.class);
+        log.debug("{}", helloVO);
+    }
 
     @Test
     public void main() {

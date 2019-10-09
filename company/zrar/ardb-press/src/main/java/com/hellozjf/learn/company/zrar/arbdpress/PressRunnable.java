@@ -101,7 +101,7 @@ public class PressRunnable implements Runnable {
     }
 
     /**
-     * 座席说
+     * 座席说，先发...，再发内容
      * @param customConfig
      * @param httpClient
      * @param callid
@@ -119,7 +119,7 @@ public class PressRunnable implements Runnable {
                 .setScheme("http")
                 .setHost(customConfig.getArbdIp())
                 .setPort(customConfig.getArbdPort())
-                .setPath("/bd/call/asr/websocketRecive")
+                .setPath(customConfig.getReceivePath())
                 .setParameter("use", "thinkit")
                 .setParameter("callid", callid)
                 .setParameter("telNum", csadCallNumber + "," + customerCallNumber)
@@ -128,12 +128,11 @@ public class PressRunnable implements Runnable {
                 .setParameter("role", "1")
                 .setParameter("dialect", "Mandarin")
                 .setParameter("voiceTime", "1000")
-                .setParameter("isKh", "0")
                 .build();
+
         HttpPost httpPost = new HttpPost(uri);
         StringEntity stringEntity = new StringEntity(content, "utf-8");
         httpPost.setEntity(stringEntity);
-
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
             String responseString = EntityUtils.toString(response.getEntity(), "utf-8");
             log.debug("csadSay: {}", responseString);
@@ -161,7 +160,7 @@ public class PressRunnable implements Runnable {
                 .setScheme("http")
                 .setHost(customConfig.getArbdIp())
                 .setPort(customConfig.getArbdPort())
-                .setPath("/bd/call/asr/websocketRecive")
+                .setPath(customConfig.getReceivePath())
                 .setParameter("use", "thinkit")
                 .setParameter("callid", callid)
                 .setParameter("telNum", customerCallNumber + "," + csadCallNumber)
@@ -170,15 +169,14 @@ public class PressRunnable implements Runnable {
                 .setParameter("role", "2")
                 .setParameter("dialect", "Mandarin")
                 .setParameter("voiceTime", "1000")
-                .setParameter("isKh", "0")
                 .build();
+
         HttpPost httpPost = new HttpPost(uri);
         StringEntity stringEntity = new StringEntity(content, "utf-8");
         httpPost.setEntity(stringEntity);
-
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
             String responseString = EntityUtils.toString(response.getEntity(), "utf-8");
-            log.debug("csadSay: {}", responseString);
+            log.debug("customerSay: {}", responseString);
         } catch (Exception e) {
             log.error("e = {}", e);
         }
@@ -193,7 +191,7 @@ public class PressRunnable implements Runnable {
                 .setScheme("http")
                 .setHost(customConfig.getArbdIp())
                 .setPort(customConfig.getArbdPort())
-                .setPath("/bd/call/asr/czCallLog")
+                .setPath(customConfig.getCallPath())
                 .setParameter("callid", callid)
                 .setParameter("czlx", "1")
                 .build();
@@ -215,7 +213,7 @@ public class PressRunnable implements Runnable {
                 .setScheme("http")
                 .setHost(customConfig.getArbdIp())
                 .setPort(customConfig.getArbdPort())
-                .setPath("/bd/call/asr/czCallLog")
+                .setPath(customConfig.getCallPath())
                 .setParameter("callid", callid)
                 .setParameter("czlx", "2")
                 .build();

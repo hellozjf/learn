@@ -31,29 +31,29 @@
         <appender-ref ref="STDOUT"/>
     </root>
     
-    <logger name="com.zrar.bd.asr.blh.AsrMonitorBLH" level="INFO" additivity="true">
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.zrar.bd.blh.ArAsrGateBLH" level="INFO" additivity="true">
-        <appender-ref ref="FILE"/>
-    </logger>
+    <!--<logger name="com.zrar.bd.asr.blh.AsrMonitorBLH" level="INFO" additivity="true">-->
+        <!--<appender-ref ref="FILE"/>-->
+    <!--</logger>-->
+    <!--<logger name="com.zrar.bd.blh.ArAsrGateBLH" level="INFO" additivity="true">-->
+        <!--<appender-ref ref="FILE"/>-->
+    <!--</logger>-->
 
     <!-- 在这里，打印到FILE最终会打印到前面设置的日志文件输出中，打印到STDOUT最终会打印到控制台 -->
     <!-- 另外这里additivity="true"表明，打印到文件的同时，还会打印到root指定的位置 -->
-    <logger name="com.zrar.bd.msg.blh.AsrCallBLH" level="DEBUG" additivity="true">
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.zrar.bd.msg.blh.AsrMsgBLH" level="DEBUG" additivity="true">
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.zrar.bd.msg.endpoint.MessageEndpoint" level="DEBUG" additivity="true">
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.zrar.bd.msg.endpoint.MessageEndpointClients" level="DEBUG" additivity="true">
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.zrar.bd.msg.util.SendMsg" level="DEBUG" additivity="true">
-        <appender-ref ref="FILE"/>
-    </logger>
+    <!--<logger name="com.zrar.bd.msg.blh.AsrCallBLH" level="DEBUG" additivity="true">-->
+        <!--<appender-ref ref="FILE"/>-->
+    <!--</logger>-->
+    <!--<logger name="com.zrar.bd.msg.blh.AsrMsgBLH" level="DEBUG" additivity="true">-->
+        <!--<appender-ref ref="FILE"/>-->
+    <!--</logger>-->
+    <!--<logger name="com.zrar.bd.msg.endpoint.MessageEndpoint" level="DEBUG" additivity="true">-->
+        <!--<appender-ref ref="FILE"/>-->
+    <!--</logger>-->
+    <!--<logger name="com.zrar.bd.msg.endpoint.MessageEndpointClients" level="DEBUG" additivity="true">-->
+        <!--<appender-ref ref="FILE"/>-->
+    <!--</logger>-->
+    <!--<logger name="com.zrar.bd.msg.util.SendMsg" level="DEBUG" additivity="true">-->
+        <!--<appender-ref ref="FILE"/>-->
+    <!--</logger>-->
 
 </configuration>
