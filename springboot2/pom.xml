@@ -29,6 +29,18 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!--docker-client-->
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>docker-client</artifactId>
+            <version>3.5.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.27</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/net.jodah/expiringmap -->
         <dependency>
             <groupId>net.jodah</groupId>
