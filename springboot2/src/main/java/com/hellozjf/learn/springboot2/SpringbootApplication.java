@@ -38,6 +38,7 @@ public class SpringbootApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         log.debug("hello = {}", customConfig.getHello());
+        log.debug("number = {}", customConfig.getNumber());
         log.debug("test = {}", dateTimeService.getWeekStartTime(dateTimeService.getCurrentTime()));
     }
 }

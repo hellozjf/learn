@@ -13,4 +13,5 @@ import org.springframework.stereotype.Component;
 public class CustomConfig {
 
     private String hello;
+    private int number;
 }

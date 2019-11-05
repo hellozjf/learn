@@ -29,11 +29,18 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.0.4</version>
+        </dependency>
+
         <!--docker-client-->
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>docker-client</artifactId>
-            <version>3.5.12</version>
+            <version>8.16.0</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
